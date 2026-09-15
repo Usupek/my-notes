@@ -1,0 +1,15 @@
+services:
+  api:
+    environment:
+      COOKIE_SECURE: "true"
+      ALLOWED_ORIGIN: https://${DOMAIN:?set DOMAIN in .env}
+
+  nginx:
+    ports: !override
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMAIN: ${DOMAIN}
+    volumes: !override
+      - ./infra/nginx/nginx.prod.conf:/etc/nginx/templates/default.conf.template:ro
+      - ${LETSENCRYPT_DIR:-/etc/letsencrypt}:/etc/letsencrypt:ro
