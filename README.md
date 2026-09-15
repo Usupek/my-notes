@@ -5,7 +5,7 @@ Aplikasi notes/blog Markdown dengan halaman publik minimalis dan panel admin. St
 ## Menjalankan dengan Docker
 
 1. Salin konfigurasi: `cp .env.example .env`.
-2. Buat hash password: `make hash-password`, lalu isi hasilnya ke `ADMIN_PASSWORD_HASH` di `.env`.
+2. Buat hash password: `make hash-password`, lalu ganti seluruh baris `ADMIN_PASSWORD_HASH` di `.env` dengan hasilnya. Tanda petik tunggal wajib dipertahankan agar `$` pada bcrypt tidak diinterpretasikan Docker Compose.
 3. Ganti `POSTGRES_PASSWORD` di `.env`.
 4. Jalankan aplikasi: `make dev`.
 5. Buka `http://localhost:8080`; panel admin tersedia di `/admin`.
@@ -22,7 +22,7 @@ cd services/api && go run ./cmd/server
 cd apps/web && npm install && npm run dev
 ```
 
-Frontend development berjalan di `http://localhost:3000`, API di `http://localhost:8080`. Nilai default `ALLOWED_ORIGIN` sudah sesuai untuk mode ini.
+Frontend development berjalan di `http://localhost:3000`, API di `http://localhost:8080`. Untuk mode tanpa Docker, ubah `ALLOWED_ORIGIN` menjadi `http://localhost:3000`; nilai default `http://localhost:8080` ditujukan untuk akses melalui Nginx pada `make dev`.
 
 ## Perintah
 

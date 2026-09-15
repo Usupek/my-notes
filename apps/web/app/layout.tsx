@@ -3,7 +3,7 @@ import Link from "next/link";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: { default: "Catatan", template: "%s · Catatan" },
+  title: "Usupek's Notes",
   description: "Catatan singkat tentang hal yang sedang dipelajari.",
 };
 
@@ -12,14 +12,13 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html lang="id">
       <body>
         <header className="site-header">
-          <Link className="wordmark" href="/">catatan<span>.</span></Link>
+          <Link className="wordmark" href="/"><span>~/</span>Home</Link>
           <nav>
-            <Link href="/">Arsip</Link>
-            <Link href="/admin">Admin</Link>
+            <Link href="/">Archive</Link>
           </nav>
         </header>
         <main>{children}</main>
-        <footer>Ditulis perlahan, disimpan rapi.</footer>
+        <footer>Ditulis perlahan, disimpan rafi.</footer>
       </body>
     </html>
   );

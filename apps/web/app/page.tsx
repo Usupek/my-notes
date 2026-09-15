@@ -19,15 +19,13 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ t
   return (
     <div className="shell home">
       <section className="intro">
-        <p className="eyebrow">CATATAN PRIBADI</p>
-        <h1>Hal-hal yang layak<br />diingat kembali.</h1>
-        <p>Kumpulan pemikiran, pelajaran, dan temuan kecil sepanjang perjalanan.</p>
+        <h1><span>Usupek&apos;s</span> Notes</h1>
       </section>
 
       <section className="archive">
         <div className="section-head">
-          <h2>{tag ? `Topik: ${tag}` : "Tulisan terbaru"}</h2>
-          <span>{notes.length} catatan</span>
+          <h2>{tag ? `Topic: ${tag}` : "Newest Notes"}</h2>
+          <span>{notes.length} note(s)</span>
         </div>
         {tags.length > 0 && (
           <div className="filters">

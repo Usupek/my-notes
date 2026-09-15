@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Markdown } from "@/components/markdown";
@@ -12,17 +11,12 @@ async function getNote(id: string): Promise<Note | null> {
   return (await response.json()).data;
 }
 
-export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
-  const note = await getNote((await params).id);
-  return { title: note?.title ?? "Catatan tidak ditemukan" };
-}
-
 export default async function NotePage({ params }: { params: Promise<{ id: string }> }) {
   const note = await getNote((await params).id);
   if (!note) notFound();
   return (
     <article className="article-shell">
-      <Link className="back-link" href="/">← Kembali ke arsip</Link>
+      <Link className="back-link" href="/">← Back to Archive</Link>
       <header className="article-header">
         <div className="note-meta">
           <time>{formatDate(note.updated_at)}</time>

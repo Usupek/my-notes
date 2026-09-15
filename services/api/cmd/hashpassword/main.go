@@ -21,5 +21,5 @@ func main() {
 		fmt.Fprintln(os.Stderr, "gagal membuat hash")
 		os.Exit(1)
 	}
-	fmt.Println(string(hash))
+	fmt.Printf("ADMIN_PASSWORD_HASH='%s'\n", hash)
 }
