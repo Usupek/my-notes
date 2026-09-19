@@ -10,7 +10,7 @@ import type { Note } from "@/lib/types";
 export function NoteEditor({ id }: { id?: string }) {
   const router = useRouter();
   const [title, setTitle] = useState("");
-  const [content, setContent] = useState("# Catatan baru\n\nMulai menulis di sini.");
+  const [content, setContent] = useState("# New note\n\nStart writing here.");
   const [tags, setTags] = useState("");
   const [published, setPublished] = useState(false);
   const [loading, setLoading] = useState(Boolean(id));
@@ -47,11 +47,11 @@ export function NoteEditor({ id }: { id?: string }) {
           tags: tags.split(",").map((tag) => tag.trim()).filter(Boolean),
         }),
       });
-      setMessage("Perubahan tersimpan.");
+      setMessage("Change saved.");
       router.refresh();
       if (!id) router.replace(`/admin/notes/${note.id}`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Gagal menyimpan catatan");
+      setError(err instanceof Error ? err.message : "Failed to save note");
     } finally {
       setBusy(false);
     }
@@ -67,9 +67,9 @@ export function NoteEditor({ id }: { id?: string }) {
     try {
       const asset = await request<{ markdown: string }>(`/admin/notes/${id}/assets`, { method: "POST", body: data });
       setContent((current) => `${current}\n\n${asset.markdown}`);
-      setMessage("Gambar ditambahkan ke editor. Simpan catatan untuk mempertahankan perubahan.");
+      setMessage("Image added to editor. Save note to keep changes.");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Gagal mengunggah gambar");
+      setError(err instanceof Error ? err.message : "Failed to upload image");
     } finally {
       setBusy(false);
       event.target.value = "";
