@@ -4,7 +4,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Usupek's Notes",
-  description: "Catatan singkat tentang hal yang sedang dipelajari.",
+  description: "Random thing(s) that I want to yap about.",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
@@ -18,7 +18,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           </nav>
         </header>
         <main>{children}</main>
-        <footer>Ditulis perlahan, disimpan rafi.</footer>
+        <footer>@Usupek 2026</footer>
       </body>
     </html>
   );

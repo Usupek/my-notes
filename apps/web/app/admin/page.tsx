@@ -40,7 +40,7 @@ export default function AdminPage() {
       setPassword("");
       setAuthenticated(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Login gagal");
+      setError(err instanceof Error ? err.message : "Login failed");
     } finally {
       setBusy(false);
     }
@@ -53,13 +53,13 @@ export default function AdminPage() {
   }
 
   async function removeNote(note: Note) {
-    if (!window.confirm(`Hapus “${note.title}”? Tindakan ini tidak dapat dibatalkan.`)) return;
+    if (!window.confirm(`Delete “${note.title}”? This action cannot be reversed.`)) return;
     try {
       await request(`/admin/notes/${note.id}`, { method: "DELETE" });
       setNotes((current) => current.filter((item) => item.id !== note.id));
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Gagal menghapus catatan");
+      setError(err instanceof Error ? err.message : "Failed to delete note");
     }
   }
 
@@ -74,26 +74,26 @@ export default function AdminPage() {
       const note = await request<Note>("/admin/notes/import", { method: "POST", body: data });
       router.push(`/admin/notes/${note.id}`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Gagal mengimpor Markdown");
+      setError(err instanceof Error ? err.message : "Failed to import markdown");
     } finally {
       setBusy(false);
       event.target.value = "";
     }
   }
 
-  if (authenticated === null) return <div className="center-card"><p>Memeriksa sesi…</p></div>;
+  if (authenticated === null) return <div className="center-card"><p>Checking Session…</p></div>;
 
   if (!authenticated) {
     return (
       <div className="login-shell">
         <form className="login-card" onSubmit={login}>
-          <p className="eyebrow">AREA ADMIN</p>
-          <h1>Selamat datang kembali.</h1>
-          <p>Masukkan password untuk mengelola catatan.</p>
+          <p className="eyebrow">AREA 54</p>
+          <h1>Welcome back King</h1>
+          <p>Enter yo bro code</p>
           <label htmlFor="password">Password</label>
           <input id="password" type="password" value={password} onChange={(event) => setPassword(event.target.value)} autoComplete="current-password" required autoFocus />
           {error && <p className="form-error">{error}</p>}
-          <button className="button primary" disabled={busy}>{busy ? "Memeriksa…" : "Masuk"}</button>
+          <button className="button primary" disabled={busy}>{busy ? "Checking…" : "In"}</button>
         </form>
       </div>
     );
@@ -105,22 +105,22 @@ export default function AdminPage() {
         <div><p className="eyebrow">DASHBOARD</p><h1>Kelola catatan</h1></div>
         <div className="actions">
           <label className="button secondary file-button">{busy ? "Mengimpor…" : "Impor .md"}<input type="file" accept=".md,text/markdown" onChange={importMarkdown} disabled={busy} /></label>
-          <Link className="button primary" href="/admin/notes/new">Catatan baru</Link>
-          <button className="text-button" onClick={logout}>Keluar</button>
+          <Link className="button primary" href="/admin/notes/new">New note</Link>
+          <button className="text-button" onClick={logout}>Log Out</button>
         </div>
       </div>
       {error && <p className="form-error">{error}</p>}
       <div className="admin-table">
-        <div className="table-head"><span>Judul</span><span>Status</span><span>Diperbarui</span><span /></div>
+        <div className="table-head"><span>Title</span><span>Status</span><span>Updated</span><span /></div>
         {notes.map((note) => (
           <div className="table-row" key={note.id}>
-            <div><Link href={`/admin/notes/${note.id}`}>{note.title}</Link><small>{note.tags.map((tag) => `#${tag.name}`).join(" ") || "Tanpa topik"}</small></div>
-            <span className={`status ${note.is_published ? "published" : "draft"}`}>{note.is_published ? "Publik" : "Draf"}</span>
+            <div><Link href={`/admin/notes/${note.id}`}>{note.title}</Link><small>{note.tags.map((tag) => `#${tag.name}`).join(" ") || "No topic"}</small></div>
+            <span className={`status ${note.is_published ? "published" : "draft"}`}>{note.is_published ? "Public" : "Draft"}</span>
             <time>{formatDate(note.updated_at)}</time>
-            <button className="danger-link" onClick={() => removeNote(note)}>Hapus</button>
+            <button className="danger-link" onClick={() => removeNote(note)}>Delete</button>
           </div>
         ))}
-        {notes.length === 0 && <div className="empty">Belum ada catatan. Mulai dengan membuat satu.</div>}
+        {notes.length === 0 && <div className="empty">Nothing to see here. Create a new one.</div>}
       </div>
     </div>
   );

@@ -29,7 +29,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ t
         </div>
         {tags.length > 0 && (
           <div className="filters">
-            <Link className={!tag ? "active" : ""} href="/">Semua</Link>
+            <Link className={!tag ? "active" : ""} href="/">All</Link>
             {tags.map((item) => <Link className={tag === item.name ? "active" : ""} href={`/?tag=${item.name}`} key={item.id}>{item.name}</Link>)}
           </div>
         )}
@@ -47,7 +47,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ t
               <span className="arrow">↗</span>
             </Link>
           ))}
-          {notes.length === 0 && <div className="empty">Belum ada catatan untuk ditampilkan.</div>}
+          {notes.length === 0 && <div className="empty">No note to show.</div>}
         </div>
       </section>
     </div>
