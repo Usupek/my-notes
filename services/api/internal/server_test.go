@@ -38,3 +38,15 @@ func TestPagination(t *testing.T) {
 		t.Fatal("expected limit above maximum to fail")
 	}
 }
+
+func TestMatchesSearch(t *testing.T) {
+	note := Note{Title: "Go Notes", Tags: []Tag{{Name: "backend"}}}
+	for _, value := range []string{"go", "back", "needle"} {
+		if !matchesSearch(note, "A needle in markdown", value) {
+			t.Fatalf("expected %q to match", value)
+		}
+	}
+	if matchesSearch(note, "A needle in markdown", "frontend") {
+		t.Fatal("unexpected search match")
+	}
+}

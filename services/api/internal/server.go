@@ -147,12 +147,55 @@ func (s *Server) listNotes(w http.ResponseWriter, r *http.Request, publishedOnly
 		writeError(w, http.StatusBadRequest, "VALIDATION_ERROR", "Invalid tag")
 		return
 	}
-	notes, err := s.store.ListNotes(r.Context(), publishedOnly, tag, page, limit)
+	query := strings.ToLower(strings.TrimSpace(r.URL.Query().Get("q")))
+	if len(query) > 200 {
+		writeError(w, http.StatusBadRequest, "VALIDATION_ERROR", "Search is too long")
+		return
+	}
+	storePage, storeLimit := page, limit
+	if query != "" {
+		storePage, storeLimit = 1, 0
+	}
+	notes, err := s.store.ListNotes(r.Context(), publishedOnly, tag, storePage, storeLimit)
 	if err != nil {
 		s.internalError(w, err)
 		return
 	}
+	if query != "" {
+		matches := make([]Note, 0)
+		for _, note := range notes {
+			if matchesSearch(note, "", query) {
+				matches = append(matches, note)
+				continue
+			}
+			content, err := os.ReadFile(s.safeMarkdownPath(note.ID, ""))
+			if err != nil {
+				s.internalError(w, err)
+				return
+			}
+			if matchesSearch(note, string(content), query) {
+				note.ContentMarkdown = string(content)
+				matches = append(matches, note)
+			}
+		}
+		start := min((page-1)*limit, len(matches))
+		end := min(start+limit, len(matches))
+		notes = matches[start:end]
+	}
 	writeData(w, http.StatusOK, notes)
+}
+
+// ponytail: linear file search suits a small archive; add a database search index when note volume makes it slow.
+func matchesSearch(note Note, content, query string) bool {
+	if strings.Contains(strings.ToLower(note.Title+"\n"+content), query) {
+		return true
+	}
+	for _, tag := range note.Tags {
+		if strings.Contains(strings.ToLower(tag.Name), query) {
+			return true
+		}
+	}
+	return false
 }
 
 func (s *Server) getPublicNote(w http.ResponseWriter, r *http.Request) { s.getNote(w, r, true) }

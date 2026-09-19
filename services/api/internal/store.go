@@ -36,7 +36,7 @@ func (s *Store) ListNotes(ctx context.Context, publishedOnly bool, tag string, p
 			SELECT 1 FROM note_tags nt JOIN tags t ON t.id = nt.tag_id
 			WHERE nt.note_id = n.id AND t.name = $2
 		))
-		ORDER BY n.updated_at DESC LIMIT $3 OFFSET $4`, publishedOnly, tag, limit, (page-1)*limit)
+		ORDER BY n.updated_at DESC LIMIT NULLIF($3, 0) OFFSET $4`, publishedOnly, tag, limit, (page-1)*limit)
 	if err != nil {
 		return nil, err
 	}
