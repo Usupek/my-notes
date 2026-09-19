@@ -12,7 +12,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html lang="id">
       <body>
         <header className="site-header">
-          <Link className="wordmark" href="/"><span>~/</span>Home</Link>
+          <Link className="wordmark" href="/"><span>/</span>home</Link>
         </header>
         <main>{children}</main>
         <footer>@Usupek 2026</footer>

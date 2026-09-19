@@ -54,13 +54,9 @@ export default async function Home({ searchParams }: { searchParams: Promise<Par
   const common = { tag, q };
   return (
     <div className="shell home">
-      <section className="intro">
-        <h1><span>Usupek&apos;s</span> Notes</h1>
-      </section>
-
       <section className="archive">
         <div className="section-head">
-          <h2>{tag ? `Topic: ${tag}` : "Newest Notes"}</h2>
+          <h1>{tag ? `Topic: ${tag}` : "Usupek's Notes"}</h1>
           <div className="search"><NoteSearch value={q} /></div>
         </div>
         {tags.length > 0 && (
