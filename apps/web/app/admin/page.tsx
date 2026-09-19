@@ -90,10 +90,10 @@ export default function AdminPage() {
           <p className="eyebrow">AREA 54</p>
           <h1>Welcome back King</h1>
           <p>Enter yo bro code</p>
-          <label htmlFor="password">Password</label>
+          <label htmlFor="password">Bro Code:</label>
           <input id="password" type="password" value={password} onChange={(event) => setPassword(event.target.value)} autoComplete="current-password" required autoFocus />
           {error && <p className="form-error">{error}</p>}
-          <button className="button primary" disabled={busy}>{busy ? "Checking…" : "In"}</button>
+          <button className="button primary" disabled={busy}>{busy ? "Checking…" : "Log in"}</button>
         </form>
       </div>
     );
@@ -102,7 +102,7 @@ export default function AdminPage() {
   return (
     <div className="shell admin-shell">
       <div className="admin-heading">
-        <div><p className="eyebrow">DASHBOARD</p><h1>Kelola catatan</h1></div>
+        <div><p className="eyebrow">DASHBOARD</p><h1>Manage notes</h1></div>
         <div className="actions">
           <label className="button secondary file-button">{busy ? "Mengimpor…" : "Impor .md"}<input type="file" accept=".md,text/markdown" onChange={importMarkdown} disabled={busy} /></label>
           <Link className="button primary" href="/admin/notes/new">New note</Link>
