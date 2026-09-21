@@ -73,6 +73,21 @@ mark { padding: 0 .08em; background: var(--accent-soft); color: inherit; }
 .markdown code { padding: 2px 5px; border-radius: 2px; background: #e6e1d7; font: .84em var(--mono); }
 .markdown pre { overflow-x: auto; padding: 22px; border-radius: 2px; background: #252622; color: #efede6; }
 .markdown pre code { padding: 0; background: none; }
+
+/* Syntax highlighting (highlight.js classes via rehype-highlight), tuned to the dark pre background. */
+.hljs { color: #efede6; }
+.hljs-comment, .hljs-quote { color: #8b8a80; font-style: italic; }
+.hljs-keyword, .hljs-selector-tag, .hljs-doctag, .hljs-meta .hljs-keyword { color: #e07a5f; }
+.hljs-string, .hljs-regexp, .hljs-addition, .hljs-meta .hljs-string { color: #a7c080; }
+.hljs-number, .hljs-literal, .hljs-symbol, .hljs-bullet, .hljs-link { color: #dbbc7f; }
+.hljs-title, .hljs-title.function_, .hljs-section, .hljs-name { color: #83c092; }
+.hljs-title.class_, .hljs-type, .hljs-built_in, .hljs-selector-class, .hljs-selector-id { color: #7fbbb3; }
+.hljs-attr, .hljs-attribute, .hljs-variable, .hljs-template-variable, .hljs-property, .hljs-params { color: #d3c6aa; }
+.hljs-tag, .hljs-punctuation, .hljs-operator { color: #c9c5b8; }
+.hljs-meta, .hljs-subst { color: #d699b6; }
+.hljs-deletion { color: #e67e80; }
+.hljs-emphasis { font-style: italic; }
+.hljs-strong { font-weight: bold; }
 .markdown table { width: 100%; border-collapse: collapse; font-family: var(--sans); font-size: 14px; }
 .markdown th, .markdown td { padding: 11px; border: 1px solid var(--line); text-align: left; }
 
@@ -122,6 +137,8 @@ input:focus, textarea:focus { border-color: var(--accent); }
 .editor-pane { border-right: 1px solid var(--line); }
 .pane-label { height: 38px; display: flex; align-items: center; padding: 0 15px; border-bottom: 1px solid var(--line); color: var(--muted); font: 10px var(--mono); letter-spacing: .12em; }
 .editor-pane textarea { width: 100%; min-height: 68vh; margin: 0; padding: 22px; resize: vertical; border: 0; border-radius: 0; background: transparent; font: 14px/1.7 var(--mono); }
+.editor-hints { display: flex; flex-wrap: wrap; gap: 6px 14px; padding: 10px 15px; border-top: 1px solid var(--line); color: var(--muted); font: 10px/1.6 var(--mono); letter-spacing: .04em; }
+.editor-hints kbd { display: inline-block; padding: 0 4px; border: 1px solid var(--line); border-radius: 2px; background: var(--panel); color: var(--ink); font: inherit; }
 .preview-pane { min-width: 0; }.preview-pane .markdown { min-height: 68vh; padding: 20px 34px 52px; }
 
 @media (max-width: 760px) {

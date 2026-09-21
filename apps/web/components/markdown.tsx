@@ -1,5 +1,6 @@
 import ReactMarkdown, { defaultUrlTransform } from "react-markdown";
 import remarkGfm from "remark-gfm";
+import rehypeHighlight from "rehype-highlight";
 
 type Props = { content: string; assetBaseUrl?: string };
 
@@ -8,6 +9,7 @@ export function Markdown({ content, assetBaseUrl }: Props) {
     <div className="markdown">
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
+        rehypePlugins={[rehypeHighlight]}
         skipHtml
         urlTransform={(url, key) => {
           if (key === "src" && assetBaseUrl && url.startsWith("./images/")) {
