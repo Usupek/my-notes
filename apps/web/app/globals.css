@@ -100,7 +100,7 @@ label { display: block; margin-top: 24px; font: 700 10px var(--mono); letter-spa
 input, textarea { width: 100%; margin-top: 8px; border: 1px solid var(--line); border-radius: 2px; outline: 0; background: var(--panel); color: var(--ink); }
 input { height: 48px; padding: 0 14px; }
 input:focus, textarea:focus { border-color: var(--accent); }
-.button { min-height: 44px; display: inline-flex; align-items: center; justify-content: center; padding: 0 18px; border: 1px solid var(--ink); border-radius: 2px; background: transparent; color: var(--ink); font: 700 10px var(--mono); letter-spacing: .06em; text-transform: uppercase; }
+.button { min-height: 44px; margin: 0; display: inline-flex; align-items: center; justify-content: center; padding: 0 18px; border: 1px solid var(--ink); border-radius: 2px; background: transparent; color: var(--ink); font: 700 10px var(--mono); letter-spacing: .06em; text-transform: uppercase; }
 .button.primary { background: var(--ink); color: var(--paper); }
 .button:hover { border-color: var(--accent); background: var(--accent); color: white; }
 .button:disabled { opacity: .5; cursor: wait; }
@@ -112,6 +112,8 @@ input:focus, textarea:focus { border-color: var(--accent); }
 .admin-heading { display: flex; justify-content: space-between; align-items: flex-end; gap: 28px; margin-bottom: 42px; }
 .admin-heading h1 { margin: 0; font: 400 clamp(46px, 6vw, 62px)/.98 var(--serif); letter-spacing: -.04em; }
 .actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+/* equal footprint for the paired actions, and no width jump while busy */
+.actions .button { min-width: 136px; }
 .file-button { position: relative; overflow: hidden; }
 .file-button input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
 .text-button, .danger-link { padding: 4px; border: 0; background: none; color: var(--muted); font: 11px var(--mono); text-decoration: underline; text-underline-offset: 3px; }
@@ -129,9 +131,16 @@ input:focus, textarea:focus { border-color: var(--accent); }
 
 .editor-shell { width: min(1320px, calc(100% - 48px)); margin: 0 auto; padding: 38px 0 70px; }
 .editor-toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid var(--line); }
-.editor-fields { display: grid; grid-template-columns: 2fr 1fr auto; gap: 18px; align-items: end; margin-bottom: 24px; }
-.editor-fields label { margin: 0; }.editor-fields small { display: block; margin-top: 7px; color: var(--muted); font: 10px/1.35 var(--sans); text-transform: none; letter-spacing: 0; }
-.switch-row { height: 48px; display: flex; align-items: center; gap: 10px; padding: 0 14px; border: 1px solid var(--line); border-radius: 2px; background: var(--panel); white-space: nowrap; }
+.editor-fields { display: grid; grid-template-columns: 2fr 1fr auto; gap: 18px; align-items: start; margin-bottom: 24px; }
+.editor-fields > label { margin: 0; }
+/* column layout keeps the caption an exact 16px block; as inline content the
+   full-width input adds baseline slack and the rows stop lining up */
+.editor-fields > label:not(.switch-row) { display: flex; flex-direction: column; line-height: 16px; }
+.editor-fields > label:not(.switch-row) > input { margin-top: 8px; }
+.editor-fields small { display: block; margin-top: 7px; color: var(--muted); font: 10px/1.35 var(--sans); text-transform: none; letter-spacing: 0; }
+/* clear the 16px caption + the input's 8px top margin to sit on the input line */
+.editor-fields > .switch-row { margin-top: 24px; }
+.switch-row { height: 48px; min-width: 136px; display: flex; align-items: center; gap: 10px; padding: 0 14px; border: 1px solid var(--line); border-radius: 2px; background: var(--panel); white-space: nowrap; }
 .switch-row input { width: 16px; height: 16px; margin: 0; accent-color: var(--accent); }
 .editor-grid { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid var(--line); background: var(--panel); }
 .editor-pane { border-right: 1px solid var(--line); }
@@ -167,6 +176,7 @@ input:focus, textarea:focus { border-color: var(--accent); }
   .editor-shell { width: calc(100% - 24px); }
   .editor-toolbar { align-items: flex-start; gap: 12px; }
   .editor-fields { grid-template-columns: 1fr; }
+  .editor-fields > .switch-row { margin-top: 0; }
   .editor-grid { grid-template-columns: 1fr; }
   .editor-pane { border-right: 0; border-bottom: 1px solid var(--line); }
   .editor-pane textarea { min-height: 52vh; }

@@ -229,7 +229,7 @@ export function NoteEditor({ id }: { id?: string }) {
         <div className="editor-fields">
           <label>Judul<input value={title} onChange={(event) => setTitle(event.target.value)} maxLength={200} placeholder="Judul catatan" required autoFocus /></label>
           <label>Topik<input value={tags} onChange={(event) => setTags(event.target.value)} placeholder="belajar, devops" /><small>Pisahkan dengan koma. Gunakan huruf kecil, angka, - atau _.</small></label>
-          <label className="switch-row"><input type="checkbox" checked={published} onChange={(event) => setPublished(event.target.checked)} /><span>Publikasikan catatan</span></label>
+          <label className="switch-row"><input type="checkbox" checked={published} onChange={(event) => setPublished(event.target.checked)} /><span>Public</span></label>
         </div>
         {error && <p className="form-error">{error}</p>}
         {message && <p className="form-success">{message}</p>}
