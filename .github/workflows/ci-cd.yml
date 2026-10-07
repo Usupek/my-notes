@@ -1,0 +1,166 @@
+name: CI/CD
+
+on:
+  pull_request:
+    branches: [master]
+  push:
+    branches: [master]
+
+permissions:
+  contents: read
+
+jobs:
+  backend:
+    name: Backend tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: services/api/go.mod
+          cache-dependency-path: services/api/go.sum
+
+      - name: Test backend
+        working-directory: services/api
+        run: go test ./...
+
+      - name: Validate Compose
+        env:
+          POSTGRES_PASSWORD: ci-placeholder
+          ADMIN_PASSWORD_HASH: ci-placeholder
+          BIND_ADDRESS: 127.0.0.1
+        run: docker compose config --quiet
+
+      - name: Validate deployment script syntax
+        run: bash -n scripts/deploy.sh
+
+  frontend:
+    name: Frontend lint and build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    defaults:
+      run:
+        working-directory: apps/web
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: apps/web/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Production build
+        run: npm run build
+
+  deploy:
+    name: Deploy to VPS
+    needs: [backend, frontend]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    permissions:
+      contents: read
+      id-token: write
+
+    concurrency:
+      group: my-notes-production
+      cancel-in-progress: false
+
+    steps:
+      - name: Connect to Tailscale
+        uses: tailscale/github-action@v4
+        with:
+          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          audience: ${{ secrets.TS_AUDIENCE }}
+          tags: tag:ci
+          version: latest
+          ping: ${{ vars.DEPLOY_HOST }}
+
+      - name: Configure SSH
+        env:
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+          DEPLOY_HOST: ${{ vars.DEPLOY_HOST }}
+        run: |
+          test -n "$DEPLOY_SSH_KEY"
+          test -n "$DEPLOY_KNOWN_HOSTS"
+          test -n "$DEPLOY_HOST"
+
+          umask 077
+          mkdir -p "$HOME/.ssh"
+          printf '%s\n' "$DEPLOY_SSH_KEY" > "$HOME/.ssh/deploy_key"
+          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
+
+          ssh-keygen -F "$DEPLOY_HOST" \
+            -f "$HOME/.ssh/known_hosts" >/dev/null
+
+      - name: Deploy tested commit
+        env:
+          DEPLOY_HOST: ${{ vars.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ vars.DEPLOY_USER }}
+          COMMIT_SHA: ${{ github.sha }}
+        run: |
+          test -n "$DEPLOY_USER"
+          [[ "$COMMIT_SHA" =~ ^[0-9a-f]{40}$ ]]
+
+          ssh \
+            -i "$HOME/.ssh/deploy_key" \
+            -o IdentitiesOnly=yes \
+            -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes \
+            -o ConnectTimeout=20 \
+            -o ServerAliveInterval=30 \
+            -o ServerAliveCountMax=6 \
+            "$DEPLOY_USER@$DEPLOY_HOST" \
+            "bash -s -- '$COMMIT_SHA'" <<'REMOTE'
+          set -Eeuo pipefail
+
+          expected_sha="$1"
+          cd /home/ubuntu/apps/my-notes
+
+          # Lock VPS juga melindungi jika koneksi runner sebelumnya terputus
+          # sementara proses deployment di server masih berjalan.
+          exec 9>.git/deploy.lock
+          flock -w 600 9
+
+          if [[ "$(git branch --show-current)" != master ]]; then
+            printf '%s\n' "VPS harus berada pada branch master."
+            exit 1
+          fi
+
+          if [[ -n "$(git status --porcelain)" ]]; then
+            printf '%s\n' "Worktree VPS tidak bersih."
+            git status --short
+            exit 1
+          fi
+
+          GIT_TERMINAL_PROMPT=0 git fetch origin master
+
+          # Commit harus berasal dari history master yang sekarang.
+          git merge-base --is-ancestor "$expected_sha" origin/master
+
+          current_sha="$(git rev-parse HEAD)"
+
+          # Jangan menurunkan versi jika deployment lebih baru sudah jalan.
+          if [[ "$current_sha" != "$expected_sha" ]] &&
+             git merge-base --is-ancestor "$expected_sha" "$current_sha"; then
+            printf '%s\n' "Commit ini lebih lama dari checkout VPS; dilewati."
+            exit 0
+          fi
+
+          git merge --ff-only "$expected_sha"
+          bash scripts/deploy.sh "$expected_sha"
+          REMOTE
