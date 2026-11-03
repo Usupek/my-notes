@@ -1,4 +1,4 @@
-.PHONY: dev build up down logs migrate test lint fmt hash-password
+.PHONY: dev build up down logs migrate test lint fmt vet hooks hash-password
 
 dev:
 	docker compose up --build
@@ -26,6 +26,12 @@ lint:
 
 fmt:
 	cd services/api && gofmt -w ./cmd ./internal
+
+vet:
+	cd services/api && go vet ./...
+
+hooks:
+	lefthook install
 
 hash-password:
 	cd services/api && go run ./cmd/hashpassword

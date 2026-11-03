@@ -1,0 +1,72 @@
+# Git hooks — install with `make hooks` (requires lefthook: https://lefthook.dev).
+# pre-commit stays fast and only looks at staged files; heavier checks run on pre-push.
+# Mirrors .github/workflows/ci-cd.yml so problems surface before CI / deploy.
+
+pre-commit:
+  parallel: true
+  commands:
+    secrets:
+      run: bash scripts/check-secrets.sh
+
+    conflict-markers:
+      run: |
+        if git diff --cached -U0 --diff-filter=ACMR | grep -qE '^\+(<{7}|>{7}|={7})( |$)'; then
+          echo "✗ merge conflict markers in staged changes" >&2; exit 1
+        fi
+
+    large-files:
+      run: |
+        status=0
+        for f in {staged_files}; do
+          size=$(git cat-file -s ":$f" 2>/dev/null || echo 0)
+          if [ "$size" -gt 1048576 ]; then echo "✗ $f is larger than 1 MB" >&2; status=1; fi
+        done
+        exit $status
+
+    gofmt:
+      root: "services/api/"
+      glob: "*.go"
+      run: |
+        unformatted=$(gofmt -l {staged_files})
+        if [ -n "$unformatted" ]; then
+          echo "✗ not gofmt-formatted (run: make fmt):" >&2; echo "$unformatted" >&2; exit 1
+        fi
+
+    go-vet:
+      root: "services/api/"
+      glob: "*.go"
+      run: go vet ./...
+
+    eslint:
+      root: "apps/web/"
+      glob: "*.{ts,tsx,js,jsx,mjs}"
+      run: npx --no-install eslint --max-warnings=0 --no-warn-ignored {staged_files}
+
+    shell-syntax:
+      glob: "*.sh"
+      run: |
+        for f in {staged_files}; do bash -n "$f" || exit 1; done
+        if command -v shellcheck >/dev/null 2>&1; then shellcheck {staged_files}; fi
+
+    compose:
+      glob: "{compose*.yaml,.env.example}"
+      env:
+        POSTGRES_PASSWORD: ci-placeholder
+        ADMIN_PASSWORD_HASH: ci-placeholder
+        BIND_ADDRESS: 127.0.0.1
+        DOMAIN: example.invalid
+      # compose.prod.yaml is an override, so validate it merged on top of the base file.
+      run: |
+        docker compose -f compose.yaml config --quiet &&
+        docker compose -f compose.yaml -f compose.prod.yaml config --quiet
+
+pre-push:
+  parallel: true
+  commands:
+    go-test:
+      root: "services/api/"
+      run: go test ./...
+
+    typecheck:
+      root: "apps/web/"
+      run: npx --no-install tsc --noEmit

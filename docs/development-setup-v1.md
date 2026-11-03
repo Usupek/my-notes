@@ -1,5 +1,5 @@
 1. Install prerequisites
-2. Clone repository
+2. Clone repository, then install git hooks: install [lefthook](https://lefthook.dev) and run `make hooks`
 3. Setup environment variables
 4. Run PostgreSQL
 5. Run backend
