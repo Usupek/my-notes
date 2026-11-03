@@ -63,24 +63,6 @@ export default function AdminPage() {
     }
   }
 
-  async function importMarkdown(event: React.ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0];
-    if (!file) return;
-    const data = new FormData();
-    data.append("file", file);
-    data.append("is_published", "false");
-    setBusy(true);
-    try {
-      const note = await request<Note>("/admin/notes/import", { method: "POST", body: data });
-      router.push(`/admin/notes/${note.id}`);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to import markdown");
-    } finally {
-      setBusy(false);
-      event.target.value = "";
-    }
-  }
-
   if (authenticated === null) return <div className="center-card"><p>Checking Session…</p></div>;
 
   if (!authenticated) {
@@ -104,7 +86,7 @@ export default function AdminPage() {
       <div className="admin-heading">
         <div><p className="eyebrow">DASHBOARD</p><h1>Manage notes</h1></div>
         <div className="actions">
-          <label className="button secondary file-button">{busy ? "Mengimpor…" : "Impor .md"}<input type="file" accept=".md,text/markdown" onChange={importMarkdown} disabled={busy} /></label>
+          <Link className="button secondary" href="/admin/notes/import">Impor .md</Link>
           <Link className="button primary" href="/admin/notes/new">New note</Link>
           <button className="text-button" onClick={logout}>Log Out</button>
         </div>

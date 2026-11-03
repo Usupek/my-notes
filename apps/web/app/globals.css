@@ -116,6 +116,15 @@ input:focus, textarea:focus { border-color: var(--accent); }
 .actions .button { min-width: 136px; }
 .file-button { position: relative; overflow: hidden; }
 .file-button input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.import-form { max-width: 640px; display: grid; gap: 18px; }
+.import-form > label { margin: 0; }
+.import-form input[type="file"] { height: auto; padding: 12px 14px; }
+.import-form small { display: block; margin-top: 8px; color: var(--muted); font: 12px/1.5 var(--sans); text-transform: none; letter-spacing: 0; }
+.import-files { margin: 0; padding: 0; list-style: none; border: 1px solid var(--line); background: var(--panel); }
+.import-files li { display: flex; justify-content: space-between; gap: 12px; padding: 10px 14px; border-bottom: 1px solid var(--line); font: 12px var(--mono); }
+.import-files li:last-child { border-bottom: 0; }
+.import-form .form-error ul { margin: 8px 0; padding-left: 18px; }
+.import-form > .button { justify-self: start; min-width: 160px; }
 .text-button, .danger-link { padding: 4px; border: 0; background: none; color: var(--muted); font: 11px var(--mono); text-decoration: underline; text-underline-offset: 3px; }
 .danger-link:hover, .text-button:hover { color: var(--accent); }
 .admin-table { border-top: 2px solid var(--ink); }
