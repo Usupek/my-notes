@@ -13,6 +13,7 @@ type Note struct {
 	ContentMarkdown string    `json:"content_markdown,omitempty"`
 	AssetBaseURL    string    `json:"asset_base_url,omitempty"`
 	IsPublished     bool      `json:"is_published"`
+	IsPinned        bool      `json:"is_pinned"`
 	CreatedAt       time.Time `json:"created_at"`
 	UpdatedAt       time.Time `json:"updated_at"`
 	Tags            []Tag     `json:"tags"`
@@ -23,4 +24,8 @@ type NoteInput struct {
 	ContentMarkdown string   `json:"content_markdown"`
 	IsPublished     bool     `json:"is_published"`
 	Tags            []string `json:"tags"`
+}
+
+type PinInput struct {
+	IsPinned bool `json:"is_pinned"`
 }

@@ -6,6 +6,7 @@ export type Note = {
   content_markdown?: string;
   asset_base_url?: string;
   is_published: boolean;
+  is_pinned: boolean;
   created_at: string;
   updated_at: string;
   tags: Tag[];

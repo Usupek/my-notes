@@ -62,6 +62,7 @@ func NewServer(cfg Config, store *Store) (http.Handler, error) {
 	mux.Handle("POST /api/v1/admin/notes/import", s.auth(http.HandlerFunc(s.importNote)))
 	mux.Handle("GET /api/v1/admin/notes/{id}", s.auth(http.HandlerFunc(s.getAdminNote)))
 	mux.Handle("PUT /api/v1/admin/notes/{id}", s.auth(http.HandlerFunc(s.updateNote)))
+	mux.Handle("PUT /api/v1/admin/notes/{id}/pin", s.auth(http.HandlerFunc(s.pinNote)))
 	mux.Handle("DELETE /api/v1/admin/notes/{id}", s.auth(http.HandlerFunc(s.deleteNote)))
 	mux.Handle("POST /api/v1/admin/notes/{id}/assets", s.auth(http.HandlerFunc(s.uploadAsset)))
 	mux.Handle("DELETE /api/v1/admin/notes/{id}/assets/{filename}", s.auth(http.HandlerFunc(s.deleteAsset)))
@@ -290,6 +291,26 @@ func (s *Server) updateNote(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	note.ContentMarkdown = input.ContentMarkdown
+	writeData(w, http.StatusOK, note)
+}
+
+func (s *Server) pinNote(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("id")
+	if !validUUID(w, id) {
+		return
+	}
+	var input PinInput
+	if !decodeJSON(w, r, &input, 1024) {
+		return
+	}
+	note, err := s.store.SetPinned(r.Context(), id, input.IsPinned)
+	if errors.Is(err, ErrNotFound) {
+		writeError(w, http.StatusNotFound, "NOTE_NOT_FOUND", "Note not found")
+		return
+	} else if err != nil {
+		s.internalError(w, err)
+		return
+	}
 	writeData(w, http.StatusOK, note)
 }
 

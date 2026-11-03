@@ -25,6 +25,8 @@ CREATE TABLE IF NOT EXISTS admin_sessions (
     expires_at TIMESTAMPTZ NOT NULL
 );
 
+ALTER TABLE notes ADD COLUMN IF NOT EXISTS is_pinned BOOLEAN NOT NULL DEFAULT FALSE;
+
 CREATE INDEX IF NOT EXISTS idx_notes_published_updated ON notes(is_published, updated_at DESC);
 CREATE INDEX IF NOT EXISTS idx_admin_sessions_token ON admin_sessions(session_token_hash);
 CREATE INDEX IF NOT EXISTS idx_admin_sessions_expires ON admin_sessions(expires_at);

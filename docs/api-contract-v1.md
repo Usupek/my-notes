@@ -733,6 +733,45 @@ multipart/form-data
 
 ---
 
+## 6.7 Pin / Unpin Note
+
+```http
+PUT /api/v1/admin/notes/:id/pin
+```
+
+Menandai note sebagai pinned atau unpinned. Tidak mengubah `updated_at`.
+
+Authentication required.
+
+### Request
+
+```json
+{
+  "is_pinned": true
+}
+```
+
+### Behavior
+
+Note yang `is_pinned = true` selalu tampil paling atas di daftar note (publik dan admin), lalu diurutkan berdasarkan `updated_at` terbaru.
+
+### Response 200
+
+Mengembalikan objek note (tanpa `content_markdown`) dengan field `is_pinned` terbaru.
+
+### Response 404
+
+```json
+{
+  "error": {
+    "code": "NOTE_NOT_FOUND",
+    "message": "Note not found"
+  }
+}
+```
+
+---
+
 # 7. Admin Asset Endpoints
 
 ## 7.1 Upload Note Asset

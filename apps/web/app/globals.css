@@ -127,8 +127,12 @@ input:focus, textarea:focus { border-color: var(--accent); }
 .import-form > .button { justify-self: start; min-width: 160px; }
 .text-button, .danger-link { padding: 4px; border: 0; background: none; color: var(--muted); font: 11px var(--mono); text-decoration: underline; text-underline-offset: 3px; }
 .danger-link:hover, .text-button:hover { color: var(--accent); }
+.row-actions { display: flex; gap: 4px; justify-content: flex-end; }
+.icon-button { display: grid; place-items: center; width: 30px; height: 30px; padding: 0; border: 0; background: none; color: var(--muted); cursor: pointer; }
+.icon-button:hover, .icon-button.active { color: var(--accent); }
+.icon-button.danger:hover { color: #b3261e; }
 .admin-table { border-top: 2px solid var(--ink); }
-.table-head, .table-row { display: grid; grid-template-columns: minmax(260px, 1fr) 100px 130px 55px; gap: 20px; align-items: center; padding: 14px 10px; border-bottom: 1px solid var(--line); }
+.table-head, .table-row { display: grid; grid-template-columns: minmax(260px, 1fr) 100px 130px 72px; gap: 20px; align-items: center; padding: 14px 10px; border-bottom: 1px solid var(--line); }
 .table-head { color: var(--muted); font: 700 9px var(--mono); letter-spacing: .1em; text-transform: uppercase; }
 .table-row { min-height: 82px; font-size: 13px; }
 .table-row:hover { background: rgba(255, 255, 255, .35); }

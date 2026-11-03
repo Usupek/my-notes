@@ -29,14 +29,14 @@ func NewStore(ctx context.Context, databaseURL string) (*Store, error) {
 
 func (s *Store) ListNotes(ctx context.Context, publishedOnly bool, tag string, page, limit int) ([]Note, error) {
 	rows, err := s.DB.Query(ctx, `
-		SELECT n.id, n.title, n.is_published, n.created_at, n.updated_at
+		SELECT n.id, n.title, n.is_published, n.is_pinned, n.created_at, n.updated_at
 		FROM notes n
 		WHERE ($1::boolean = false OR n.is_published = true)
 		AND ($2::text = '' OR EXISTS (
 			SELECT 1 FROM note_tags nt JOIN tags t ON t.id = nt.tag_id
 			WHERE nt.note_id = n.id AND t.name = $2
 		))
-		ORDER BY n.updated_at DESC LIMIT NULLIF($3, 0) OFFSET $4`, publishedOnly, tag, limit, (page-1)*limit)
+		ORDER BY n.is_pinned DESC, n.updated_at DESC LIMIT NULLIF($3, 0) OFFSET $4`, publishedOnly, tag, limit, (page-1)*limit)
 	if err != nil {
 		return nil, err
 	}
@@ -44,7 +44,7 @@ func (s *Store) ListNotes(ctx context.Context, publishedOnly bool, tag string, p
 	notes := make([]Note, 0)
 	for rows.Next() {
 		var note Note
-		if err := rows.Scan(&note.ID, &note.Title, &note.IsPublished, &note.CreatedAt, &note.UpdatedAt); err != nil {
+		if err := rows.Scan(&note.ID, &note.Title, &note.IsPublished, &note.IsPinned, &note.CreatedAt, &note.UpdatedAt); err != nil {
 			return nil, err
 		}
 		note.Tags, err = s.noteTags(ctx, note.ID)
@@ -59,9 +59,9 @@ func (s *Store) ListNotes(ctx context.Context, publishedOnly bool, tag string, p
 func (s *Store) GetNote(ctx context.Context, id string, publishedOnly bool) (Note, string, error) {
 	var note Note
 	var path string
-	err := s.DB.QueryRow(ctx, `SELECT id, title, markdown_file_path, is_published, created_at, updated_at
+	err := s.DB.QueryRow(ctx, `SELECT id, title, markdown_file_path, is_published, is_pinned, created_at, updated_at
 		FROM notes WHERE id = $1 AND ($2::boolean = false OR is_published = true)`, id, publishedOnly).
-		Scan(&note.ID, &note.Title, &path, &note.IsPublished, &note.CreatedAt, &note.UpdatedAt)
+		Scan(&note.ID, &note.Title, &path, &note.IsPublished, &note.IsPinned, &note.CreatedAt, &note.UpdatedAt)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return Note{}, "", ErrNotFound
 	}
@@ -114,6 +114,18 @@ func (s *Store) UpdateNote(ctx context.Context, id string, input NoteInput) (Not
 	}
 	if err := tx.Commit(ctx); err != nil {
 		return Note{}, err
+	}
+	note, _, err := s.GetNote(ctx, id, false)
+	return note, err
+}
+
+func (s *Store) SetPinned(ctx context.Context, id string, pinned bool) (Note, error) {
+	result, err := s.DB.Exec(ctx, `UPDATE notes SET is_pinned=$2 WHERE id=$1`, id, pinned)
+	if err != nil {
+		return Note{}, err
+	}
+	if result.RowsAffected() == 0 {
+		return Note{}, ErrNotFound
 	}
 	note, _, err := s.GetNote(ctx, id, false)
 	return note, err
