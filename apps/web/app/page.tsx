@@ -72,7 +72,8 @@ export default async function Home({ searchParams }: { searchParams: Promise<Par
               <div>
                 <h3>{highlight(note.title, q)}</h3>
                 <div className="note-meta">
-                  <time>{formatDate(note.updated_at)}</time>
+                  <time dateTime={note.created_at}>Created {formatDate(note.created_at)}</time>
+                  <time dateTime={note.updated_at}>Modified {formatDate(note.updated_at)}</time>
                   {note.tags.map((item) => <span key={item.id}>#{highlight(item.name, q)}</span>)}
                 </div>
                 {matchingLine(note.content_markdown, q) && <p className="search-excerpt">{highlight(matchingLine(note.content_markdown, q)!, q)}</p>}

@@ -19,7 +19,8 @@ export default async function NotePage({ params }: { params: Promise<{ id: strin
       <Link className="back-link" href="/">← Back to Archive</Link>
       <header className="article-header">
         <div className="note-meta">
-          <time>{formatDate(note.updated_at)}</time>
+          <time dateTime={note.created_at}>Created {formatDate(note.created_at)}</time>
+          <time dateTime={note.updated_at}>Modified {formatDate(note.updated_at)}</time>
           {note.tags.map((tag) => <span key={tag.id}>#{tag.name}</span>)}
         </div>
         <h1>{note.title}</h1>

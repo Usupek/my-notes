@@ -111,12 +111,13 @@ export default function AdminPage() {
       </div>
       {error && <p className="form-error">{error}</p>}
       <div className="admin-table">
-        <div className="table-head"><span>Title</span><span>Status</span><span>Updated</span><span /></div>
+        <div className="table-head"><span>Title</span><span>Status</span><span>Created</span><span>Modified</span><span /></div>
         {notes.map((note) => (
           <div className="table-row" key={note.id}>
             <div><Link href={`/admin/notes/${note.id}`}>{note.title}</Link><small>{note.tags.map((tag) => `#${tag.name}`).join(" ") || "No topic"}</small></div>
             <span className={`status ${note.is_published ? "published" : "draft"}`}>{note.is_published ? "Public" : "Draft"}</span>
-            <time>{formatDate(note.updated_at)}</time>
+            <time dateTime={note.created_at}>{formatDate(note.created_at)}</time>
+            <time dateTime={note.updated_at}>{formatDate(note.updated_at)}</time>
             <div className="row-actions">
               <button className="icon-button danger" onClick={() => removeNote(note)} title="Delete" aria-label={`Delete ${note.title}`}>
                 <TrashIcon />
