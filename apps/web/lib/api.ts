@@ -13,12 +13,12 @@ export async function request<T>(path: string, init?: RequestInit): Promise<T> {
     ...init,
   });
   const body = (await response.json().catch(() => ({}))) as { data: T } & ApiError;
-  if (!response.ok) throw new Error(body.error?.message ?? "Permintaan gagal");
+  if (!response.ok) throw new Error(body.error?.message ?? "Request failed");
   return body.data;
 }
 
 export function formatDate(value: string) {
-  return new Intl.DateTimeFormat("id-ID", {
+  return new Intl.DateTimeFormat("en-GB", {
     day: "numeric",
     month: "short",
     year: "numeric",

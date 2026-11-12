@@ -70,7 +70,7 @@ export default function ImportNotePage() {
     setError("");
     setFailed(null);
     try {
-      setProgress("Mengimpor markdown…");
+      setProgress("Importing markdown…");
       const data = new FormData();
       data.append("file", markdownFile);
       data.append("is_published", "false");
@@ -80,21 +80,21 @@ export default function ImportNotePage() {
       const errors: string[] = [];
       const taken = new Set<string>();
       for (const [index, image] of images.entries()) {
-        setProgress(`Mengunggah gambar ${index + 1}/${images.length}…`);
+        setProgress(`Uploading image ${index + 1}/${images.length}…`);
         const body = new FormData();
         body.append("file", image, safeImageName(image.name, taken));
         try {
           const asset = await request<{ url: string }>(`/admin/notes/${note.id}/assets`, { method: "POST", body });
           urls.set(image.name.toLowerCase(), asset.url);
         } catch (err) {
-          errors.push(`${image.name}: ${err instanceof Error ? err.message : "gagal diunggah"}`);
+          errors.push(`${image.name}: ${err instanceof Error ? err.message : "upload failed"}`);
         }
       }
 
       const original = note.content_markdown ?? (await markdownFile.text());
       const linked = linkImages(original, urls);
       if (linked !== original) {
-        setProgress("Menautkan gambar…");
+        setProgress("Linking images…");
         await request<Note>(`/admin/notes/${note.id}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -113,7 +113,7 @@ export default function ImportNotePage() {
       }
       router.push(`/admin/notes/${note.id}`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Gagal mengimpor note");
+      setError(err instanceof Error ? err.message : "Failed to import note");
     } finally {
       setBusy(false);
       setProgress("");
@@ -125,18 +125,18 @@ export default function ImportNotePage() {
   return (
     <div className="shell admin-shell">
       <div className="admin-heading">
-        <div><p className="eyebrow">IMPOR</p><h1>Import note</h1></div>
+        <div><p className="eyebrow">IMPORT</p><h1>Import note</h1></div>
         <div className="actions"><Link className="text-button" href="/admin">← Back</Link></div>
       </div>
       <form className="import-form" onSubmit={submit}>
         <label>
-          File markdown (.md)
+          Markdown file (.md)
           <input type="file" accept=".md,text/markdown" required disabled={busy} onChange={(event) => setMarkdownFile(event.target.files?.[0] ?? null)} />
         </label>
         <label>
-          Gambar (opsional, bisa lebih dari satu)
+          Images (optional, multiple allowed)
           <input type="file" accept={IMAGE_ACCEPT} multiple disabled={busy} onChange={addImages} />
-          <small>Gambar yang direferensikan di markdown (mis. <code>![](images/foto.png)</code> atau <code>![[foto.png]]</code>) akan ditautkan otomatis berdasarkan nama file.</small>
+          <small>Images referenced in the markdown (e.g. <code>![](images/photo.png)</code> or <code>![[photo.png]]</code>) are linked automatically by file name.</small>
         </label>
         {images.length > 0 && (
           <ul className="import-files">
@@ -151,12 +151,12 @@ export default function ImportNotePage() {
         {error && <p className="form-error">{error}</p>}
         {failed && (
           <div className="form-error">
-            <p>Note berhasil diimpor, tetapi beberapa gambar gagal diunggah:</p>
+            <p>Note imported, but some images failed to upload:</p>
             <ul>{failed.errors.map((item) => <li key={item}>{item}</li>)}</ul>
-            <Link href={`/admin/notes/${failed.note.id}`}>Buka note →</Link>
+            <Link href={`/admin/notes/${failed.note.id}`}>Open note →</Link>
           </div>
         )}
-        <button className="button primary" disabled={busy || !markdownFile}>{busy ? progress || "Mengimpor…" : "Impor"}</button>
+        <button className="button primary" disabled={busy || !markdownFile}>{busy ? progress || "Importing…" : "Import"}</button>
       </form>
     </div>
   );

@@ -104,7 +104,7 @@ export default function AdminPage() {
       <div className="admin-heading">
         <div><p className="eyebrow">DASHBOARD</p><h1>Manage notes</h1></div>
         <div className="actions">
-          <Link className="button secondary" href="/admin/notes/import">Impor .md</Link>
+          <Link className="button secondary" href="/admin/notes/import">Import .md</Link>
           <Link className="button primary" href="/admin/notes/new">New note</Link>
           <button className="text-button" onClick={logout}>Log Out</button>
         </div>

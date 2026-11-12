@@ -2,7 +2,7 @@
 
 ## 1. Overview
 
-API menggunakan REST dengan format JSON.
+The API is REST with JSON payloads.
 
 Base path:
 
@@ -10,11 +10,11 @@ Base path:
 /api/v1
 ```
 
-Aplikasi menggunakan PostgreSQL untuk menyimpan metadata notes, tags, relasi tags, dan admin sessions.
+The app uses PostgreSQL to store note metadata, tags, tag relations, and admin sessions.
 
-Konten utama note tidak disimpan di database. Konten note disimpan sebagai file markdown di filesystem. Setiap note memiliki folder berdasarkan UUID.
+The main note content is not stored in the database. Note content is stored as a markdown file on the filesystem. Each note has a folder named after its UUID.
 
-Contoh struktur storage:
+Example storage layout:
 
 ```txt
 data/
@@ -26,13 +26,13 @@ data/
         screenshot.jpg
 ```
 
-API tetap menerima dan mengembalikan `content_markdown`, tetapi backend akan membaca atau menulis data tersebut dari/ke file markdown.
+The API still accepts and returns `content_markdown`, but the backend reads and writes that data from/to the markdown file.
 
 ---
 
 ## 2. Authentication
 
-Admin authentication menggunakan session cookie.
+Admin authentication uses a session cookie.
 
 Cookie name:
 
@@ -40,7 +40,7 @@ Cookie name:
 admin_session
 ```
 
-Cookie admin session harus menggunakan atribut berikut di production:
+In production, the admin session cookie must use the following attributes:
 
 ```txt
 HttpOnly
@@ -48,9 +48,9 @@ Secure
 SameSite
 ```
 
-Admin endpoint hanya dapat diakses jika request memiliki session cookie yang valid.
+Admin endpoints can only be accessed when the request carries a valid session cookie.
 
-Session token asli hanya dikirim ke browser melalui cookie. Database hanya menyimpan hash dari session token.
+The raw session token is only sent to the browser via the cookie. The database only stores a hash of the session token.
 
 ---
 
@@ -99,17 +99,17 @@ INTERNAL_SERVER_ERROR
 GET /api/v1/notes
 ```
 
-Mengambil daftar notes yang sudah published.
+Fetches the list of published notes.
 
-Endpoint ini tidak mengembalikan isi markdown. Endpoint ini hanya mengembalikan metadata note untuk ditampilkan di homepage.
+This endpoint does not return markdown content. It only returns note metadata for display on the homepage.
 
 ### Query Params
 
 | Param | Required | Description |
 |---|---|---|
-| tag | No | Filter notes berdasarkan nama tag |
-| page | No | Nomor halaman |
-| limit | No | Jumlah data per halaman |
+| tag | No | Filter notes by tag name |
+| page | No | Page number |
+| limit | No | Items per page |
 
 ### Response 200
 
@@ -118,7 +118,7 @@ Endpoint ini tidak mengembalikan isi markdown. Endpoint ini hanya mengembalikan 
   "data": [
     {
       "id": "8b3f1e6a-6f83-4f44-97c2-9d45f32b9a12",
-      "title": "Belajar Docker",
+      "title": "Learning Docker",
       "is_published": true,
       "created_at": "2026-05-21T10:00:00Z",
       "updated_at": "2026-05-21T10:00:00Z",
@@ -145,14 +145,14 @@ Endpoint ini tidak mengembalikan isi markdown. Endpoint ini hanya mengembalikan 
 GET /api/v1/notes/:id
 ```
 
-Mengambil detail note berdasarkan UUID.
+Fetches a note's details by UUID.
 
-Backend akan:
+The backend will:
 
-1. Mencari metadata note di database.
-2. Mengecek apakah note published.
-3. Membaca file markdown dari filesystem.
-4. Mengembalikan metadata dan konten markdown.
+1. Look up the note metadata in the database.
+2. Check whether the note is published.
+3. Read the markdown file from the filesystem.
+4. Return the metadata and markdown content.
 
 ### Response 200
 
@@ -160,8 +160,8 @@ Backend akan:
 {
   "data": {
     "id": "8b3f1e6a-6f83-4f44-97c2-9d45f32b9a12",
-    "title": "Belajar Docker",
-    "content_markdown": "# Belajar Docker\n\nIni catatan belajar Docker.\n\n![Diagram](./images/diagram.png)",
+    "title": "Learning Docker",
+    "content_markdown": "# Learning Docker\n\nThese are my notes on learning Docker.\n\n![Diagram](./images/diagram.png)",
     "asset_base_url": "/api/v1/notes/8b3f1e6a-6f83-4f44-97c2-9d45f32b9a12/assets",
     "is_published": true,
     "created_at": "2026-05-21T10:00:00Z",
@@ -195,15 +195,15 @@ Backend akan:
 GET /api/v1/notes/:id/assets/:filename
 ```
 
-Mengambil asset atau gambar milik note.
+Fetches an asset or image belonging to a note.
 
-Contoh:
+Example:
 
 ```http
 GET /api/v1/notes/8b3f1e6a-6f83-4f44-97c2-9d45f32b9a12/assets/diagram.png
 ```
 
-Backend akan membaca file dari:
+The backend reads the file from:
 
 ```txt
 data/notes/{note_id}/images/{filename}
@@ -211,10 +211,10 @@ data/notes/{note_id}/images/{filename}
 
 ### Rules
 
-- Asset hanya dapat diakses jika note published.
-- Backend harus mencegah path traversal seperti `../../.env`.
-- Backend hanya boleh membaca file dari folder note tersebut.
-- File yang boleh di-serve hanya file image yang diizinkan.
+- Assets can only be accessed if the note is published.
+- The backend must prevent path traversal such as `../../.env`.
+- The backend may only read files from that note's folder.
+- Only allowed image files may be served.
 
 Allowed image types V1:
 
@@ -249,7 +249,7 @@ Binary image response.
 GET /api/v1/tags
 ```
 
-Mengambil daftar tags.
+Fetches the list of tags.
 
 ### Response 200
 
@@ -282,7 +282,7 @@ Mengambil daftar tags.
 POST /api/v1/admin/login
 ```
 
-Login admin menggunakan password.
+Admin login uses a password.
 
 ### Request
 
@@ -294,13 +294,13 @@ Login admin menggunakan password.
 
 ### Behavior
 
-Backend akan:
+The backend will:
 
-1. Membandingkan password dengan hash password dari environment variable.
-2. Jika valid, generate session token.
-3. Hash session token.
-4. Simpan hash session token ke table `admin_sessions`.
-5. Kirim raw session token ke browser melalui cookie `admin_session`.
+1. Compare the password against the password hash from the environment variable.
+2. If valid, generate a session token.
+3. Hash the session token.
+4. Store the session token hash in the `admin_sessions` table.
+5. Send the raw session token to the browser via the `admin_session` cookie.
 
 ### Response 200
 
@@ -331,7 +331,7 @@ Backend akan:
 POST /api/v1/admin/logout
 ```
 
-Logout admin dan hapus session aktif.
+Logs the admin out and deletes the active session.
 
 Authentication required.
 
@@ -364,7 +364,7 @@ Authentication required.
 GET /api/v1/admin/me
 ```
 
-Mengecek apakah admin sedang login.
+Checks whether the admin is logged in.
 
 Authentication required.
 
@@ -399,19 +399,19 @@ Authentication required.
 GET /api/v1/admin/notes
 ```
 
-Mengambil semua notes untuk admin panel, termasuk draft atau unpublished notes.
+Fetches all notes for the admin panel, including drafts/unpublished notes.
 
 Authentication required.
 
-Endpoint ini hanya mengembalikan metadata, bukan isi markdown.
+This endpoint only returns metadata, not markdown content.
 
 ### Query Params
 
 | Param | Required | Description |
 |---|---|---|
-| tag | No | Filter notes berdasarkan nama tag |
-| page | No | Nomor halaman |
-| limit | No | Jumlah data per halaman |
+| tag | No | Filter notes by tag name |
+| page | No | Page number |
+| limit | No | Items per page |
 
 ### Response 200
 
@@ -420,7 +420,7 @@ Endpoint ini hanya mengembalikan metadata, bukan isi markdown.
   "data": [
     {
       "id": "8b3f1e6a-6f83-4f44-97c2-9d45f32b9a12",
-      "title": "Belajar Docker",
+      "title": "Learning Docker",
       "is_published": false,
       "created_at": "2026-05-21T10:00:00Z",
       "updated_at": "2026-05-21T10:00:00Z",
@@ -443,17 +443,17 @@ Endpoint ini hanya mengembalikan metadata, bukan isi markdown.
 GET /api/v1/admin/notes/:id
 ```
 
-Mengambil detail note untuk admin panel.
+Fetches a note's details for the admin panel.
 
-Berbeda dari public endpoint, endpoint ini bisa membaca note walaupun `is_published = false`.
+Unlike the public endpoint, this endpoint can read a note even when `is_published = false`.
 
 Authentication required.
 
-Backend akan:
+The backend will:
 
-1. Mencari metadata note di database.
-2. Membaca file markdown dari filesystem.
-3. Mengembalikan metadata dan konten markdown.
+1. Look up the note metadata in the database.
+2. Read the markdown file from the filesystem.
+3. Return the metadata and markdown content.
 
 ### Response 200
 
@@ -461,8 +461,8 @@ Backend akan:
 {
   "data": {
     "id": "8b3f1e6a-6f83-4f44-97c2-9d45f32b9a12",
-    "title": "Belajar Docker",
-    "content_markdown": "# Belajar Docker\n\nDraft note...",
+    "title": "Learning Docker",
+    "content_markdown": "# Learning Docker\n\nDraft note...",
     "asset_base_url": "/api/v1/notes/8b3f1e6a-6f83-4f44-97c2-9d45f32b9a12/assets",
     "is_published": false,
     "created_at": "2026-05-21T10:00:00Z",
@@ -496,7 +496,7 @@ Backend akan:
 POST /api/v1/admin/notes
 ```
 
-Membuat note baru.
+Creates a new note.
 
 Authentication required.
 
@@ -504,8 +504,8 @@ Authentication required.
 
 ```json
 {
-  "title": "Belajar Docker",
-  "content_markdown": "# Belajar Docker\n\nIni catatan belajar Docker.",
+  "title": "Learning Docker",
+  "content_markdown": "# Learning Docker\n\nThese are my notes on learning Docker.",
   "is_published": true,
   "tags": ["study", "devops"]
 }
@@ -513,16 +513,16 @@ Authentication required.
 
 ### Behavior
 
-Backend akan:
+The backend will:
 
-1. Generate UUID note.
-2. Membuat folder `data/notes/{note_id}`.
-3. Membuat folder `data/notes/{note_id}/images`.
-4. Membuat file `data/notes/{note_id}/{note_id}-note.md`.
-5. Menulis `content_markdown` ke file markdown.
-6. Menyimpan metadata note ke database.
-7. Membuat tag jika belum ada.
-8. Menyimpan relasi note dan tag ke table `note_tags`.
+1. Generate the note UUID.
+2. Create the folder `data/notes/{note_id}`.
+3. Create the folder `data/notes/{note_id}/images`.
+4. Create the file `data/notes/{note_id}/{note_id}-note.md`.
+5. Write `content_markdown` to the markdown file.
+6. Save the note metadata to the database.
+7. Create tags that do not exist yet.
+8. Save the note–tag relations to the `note_tags` table.
 
 ### Response 201
 
@@ -530,8 +530,8 @@ Backend akan:
 {
   "data": {
     "id": "8b3f1e6a-6f83-4f44-97c2-9d45f32b9a12",
-    "title": "Belajar Docker",
-    "content_markdown": "# Belajar Docker\n\nIni catatan belajar Docker.",
+    "title": "Learning Docker",
+    "content_markdown": "# Learning Docker\n\nThese are my notes on learning Docker.",
     "asset_base_url": "/api/v1/notes/8b3f1e6a-6f83-4f44-97c2-9d45f32b9a12/assets",
     "is_published": true,
     "created_at": "2026-05-21T10:00:00Z",
@@ -569,7 +569,7 @@ Backend akan:
 PUT /api/v1/admin/notes/:id
 ```
 
-Mengedit note berdasarkan UUID.
+Edits a note by UUID.
 
 Authentication required.
 
@@ -577,8 +577,8 @@ Authentication required.
 
 ```json
 {
-  "title": "Belajar Docker Updated",
-  "content_markdown": "# Belajar Docker Updated\n\nKonten baru.",
+  "title": "Learning Docker Updated",
+  "content_markdown": "# Learning Docker Updated\n\nNew content.",
   "is_published": true,
   "tags": ["study", "devops"]
 }
@@ -586,12 +586,12 @@ Authentication required.
 
 ### Behavior
 
-Backend akan:
+The backend will:
 
-1. Mencari metadata note di database.
-2. Menulis ulang file markdown milik note.
-3. Update metadata note di database.
-4. Update relasi tags.
+1. Look up the note metadata in the database.
+2. Rewrite the note's markdown file.
+3. Update the note metadata in the database.
+4. Update the tag relations.
 5. Update `updated_at`.
 
 ### Response 200
@@ -600,8 +600,8 @@ Backend akan:
 {
   "data": {
     "id": "8b3f1e6a-6f83-4f44-97c2-9d45f32b9a12",
-    "title": "Belajar Docker Updated",
-    "content_markdown": "# Belajar Docker Updated\n\nKonten baru.",
+    "title": "Learning Docker Updated",
+    "content_markdown": "# Learning Docker Updated\n\nNew content.",
     "asset_base_url": "/api/v1/notes/8b3f1e6a-6f83-4f44-97c2-9d45f32b9a12/assets",
     "is_published": true,
     "updated_at": "2026-05-21T11:00:00Z",
@@ -638,19 +638,19 @@ Backend akan:
 DELETE /api/v1/admin/notes/:id
 ```
 
-Menghapus note berdasarkan UUID.
+Deletes a note by UUID.
 
 Authentication required.
 
 ### Behavior
 
-Backend akan:
+The backend will:
 
-1. Menghapus metadata note dari database.
-2. Menghapus relasi tag dari `note_tags`.
-3. Menghapus folder note dari filesystem.
+1. Delete the note metadata from the database.
+2. Delete the tag relations from `note_tags`.
+3. Delete the note folder from the filesystem.
 
-Jika penghapusan filesystem gagal, backend harus mencatat error di log.
+If deleting from the filesystem fails, the backend must log the error.
 
 ### Response 200
 
@@ -681,7 +681,7 @@ Jika penghapusan filesystem gagal, backend harus mencatat error di log.
 POST /api/v1/admin/notes/import
 ```
 
-Mengimpor note dari file markdown.
+Imports a note from a markdown file.
 
 Authentication required.
 
@@ -695,19 +695,19 @@ multipart/form-data
 
 | Field | Required | Description |
 |---|---|---|
-| file | Yes | File markdown `.md` |
-| title | No | Judul note. Jika kosong, backend dapat menggunakan nama file |
-| is_published | No | Status publish note |
-| tags | No | Daftar tag, contoh `study,devops` |
+| file | Yes | Markdown file `.md` |
+| title | No | Note title. If empty, the backend may use the file name |
+| is_published | No | Note publish status |
+| tags | No | List of tags, e.g. `study,devops` |
 
 ### Rules
 
-- File harus berekstensi `.md`.
-- File seperti `file.php.md` harus ditolak atau ditangani secara aman.
-- Ukuran file markdown harus dibatasi.
-- Nama file harus divalidasi dan dinormalisasi.
-- Konten file markdown disimpan ke folder note.
-- Konten markdown tidak boleh langsung dirender sebagai raw HTML di frontend.
+- The file must have the `.md` extension.
+- Files such as `file.php.md` must be rejected or handled safely.
+- Markdown file size must be limited.
+- File names must be validated and normalized.
+- The markdown file content is stored in the note folder.
+- Markdown content must not be rendered directly as raw HTML on the frontend.
 
 ### Response 201
 
@@ -716,7 +716,7 @@ multipart/form-data
   "data": {
     "id": "8b3f1e6a-6f83-4f44-97c2-9d45f32b9a12",
     "title": "Imported Note",
-    "content_markdown": "# Imported Note\n\nKonten dari file markdown.",
+    "content_markdown": "# Imported Note\n\nContent from the markdown file.",
     "asset_base_url": "/api/v1/notes/8b3f1e6a-6f83-4f44-97c2-9d45f32b9a12/assets",
     "is_published": true,
     "created_at": "2026-05-21T10:00:00Z",
@@ -739,7 +739,7 @@ multipart/form-data
 PUT /api/v1/admin/notes/:id/pin
 ```
 
-Menandai note sebagai pinned atau unpinned. Tidak mengubah `updated_at`.
+Marks a note as pinned or unpinned. Does not change `updated_at`.
 
 Authentication required.
 
@@ -753,11 +753,11 @@ Authentication required.
 
 ### Behavior
 
-Note yang `is_pinned = true` selalu tampil paling atas di daftar note (publik dan admin), lalu diurutkan berdasarkan `updated_at` terbaru.
+Notes with `is_pinned = true` always appear at the top of the note list (public and admin), followed by the most recently `updated_at`.
 
 ### Response 200
 
-Mengembalikan objek note (tanpa `content_markdown`) dengan field `is_pinned` terbaru.
+Returns the note object (without `content_markdown`) with the updated `is_pinned` field.
 
 ### Response 404
 
@@ -780,7 +780,7 @@ Mengembalikan objek note (tanpa `content_markdown`) dengan field `is_pinned` ter
 POST /api/v1/admin/notes/:id/assets
 ```
 
-Upload gambar atau asset untuk note.
+Uploads an image or asset for a note.
 
 Authentication required.
 
@@ -808,14 +808,14 @@ Allowed file types:
 
 ### Behavior
 
-Backend akan:
+The backend will:
 
-1. Mengecek note exists.
-2. Validasi file extension.
-3. Validasi ukuran file.
-4. Normalisasi filename.
-5. Simpan file ke `data/notes/{note_id}/images/{filename}`.
-6. Return URL asset.
+1. Check that the note exists.
+2. Validate the file extension.
+3. Validate the file size.
+4. Normalize the filename.
+5. Save the file to `data/notes/{note_id}/images/{filename}`.
+6. Return the asset URL.
 
 ### Response 201
 
@@ -848,17 +848,17 @@ Backend akan:
 DELETE /api/v1/admin/notes/:id/assets/:filename
 ```
 
-Menghapus gambar atau asset dari note.
+Deletes an image or asset from a note.
 
 Authentication required.
 
 ### Behavior
 
-Backend akan:
+The backend will:
 
-1. Mengecek note exists.
-2. Validasi filename.
-3. Menghapus file dari `data/notes/{note_id}/images/{filename}`.
+1. Check that the note exists.
+2. Validate the filename.
+3. Delete the file from `data/notes/{note_id}/images/{filename}`.
 
 ### Response 200
 
@@ -891,7 +891,7 @@ Backend akan:
 GET /api/v1/healthz
 ```
 
-Mengecek apakah backend hidup.
+Checks whether the backend is alive.
 
 ### Response 200
 
@@ -909,12 +909,12 @@ Mengecek apakah backend hidup.
 GET /api/v1/readyz
 ```
 
-Mengecek apakah backend siap menerima request.
+Checks whether the backend is ready to accept requests.
 
-Readiness check harus memeriksa:
+The readiness check must verify:
 
-- Koneksi ke database.
-- Akses ke notes storage directory.
+- Database connection.
+- Access to the notes storage directory.
 
 ### Response 200
 
@@ -1056,7 +1056,7 @@ volumes:
   notes_storage:
 ```
 
-Backup production harus mencakup:
+Production backups must include:
 
 ```txt
 1. PostgreSQL database

@@ -214,7 +214,7 @@ export function NoteEditor({ id }: { id?: string }) {
     for (const file of images) void uploadFile(file, pastedFilename(file));
   }
 
-  if (loading) return <div className="center-card"><p>Memuat editor…</p></div>;
+  if (loading) return <div className="center-card"><p>Loading editor…</p></div>;
 
   return (
     <div className="editor-shell">
@@ -222,13 +222,13 @@ export function NoteEditor({ id }: { id?: string }) {
         <div className="editor-toolbar">
           <Link className="back-link" href="/admin">← Dashboard</Link>
           <div className="actions">
-            {id && <label className="button secondary file-button">Tambah gambar<input type="file" accept={IMAGE_TYPES.join(",")} onChange={uploadImage} disabled={busy} /></label>}
-            <button className="button primary" disabled={busy}>{busy ? "Menyimpan…" : "Simpan"}</button>
+            {id && <label className="button secondary file-button">Add image<input type="file" accept={IMAGE_TYPES.join(",")} onChange={uploadImage} disabled={busy} /></label>}
+            <button className="button primary" disabled={busy}>{busy ? "Saving…" : "Save"}</button>
           </div>
         </div>
         <div className="editor-fields">
-          <label>Judul<input value={title} onChange={(event) => setTitle(event.target.value)} maxLength={200} placeholder="Judul catatan" required autoFocus /></label>
-          <label>Topik<input value={tags} onChange={(event) => setTags(event.target.value)} placeholder="belajar, devops" /><small>Pisahkan dengan koma. Gunakan huruf kecil, angka, - atau _.</small></label>
+          <label>Title<input value={title} onChange={(event) => setTitle(event.target.value)} maxLength={200} placeholder="Note title" required autoFocus /></label>
+          <label>Topics<input value={tags} onChange={(event) => setTags(event.target.value)} placeholder="learning, devops" /><small>Separate with commas. Use lowercase letters, numbers, - or _.</small></label>
           <label className="switch-row"><input type="checkbox" checked={published} onChange={(event) => setPublished(event.target.checked)} /><span>Public</span></label>
         </div>
         {error && <p className="form-error">{error}</p>}
@@ -251,7 +251,7 @@ export function NoteEditor({ id }: { id?: string }) {
               <span><kbd>Ctrl</kbd>+<kbd>V</kbd> paste image</span>
             </div>
           </div>
-          <div className="preview-pane"><div className="pane-label">PRATINJAU</div><Markdown content={content} assetBaseUrl={id ? `/api/v1/notes/${id}/assets` : undefined} /></div>
+          <div className="preview-pane"><div className="pane-label">PREVIEW</div><Markdown content={content} assetBaseUrl={id ? `/api/v1/notes/${id}/assets` : undefined} /></div>
         </div>
       </form>
     </div>

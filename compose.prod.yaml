@@ -4,6 +4,10 @@ services:
       COOKIE_SECURE: "true"
       ALLOWED_ORIGIN: https://${DOMAIN:?set DOMAIN in .env}
 
+  web:
+    environment:
+      SITE_URL: https://${DOMAIN:?set DOMAIN in .env}
+
   nginx:
     ports: !override
       - "80:80"

@@ -131,33 +131,33 @@ jobs:
           expected_sha="$1"
           cd /home/ubuntu/apps/my-notes
 
-          # Lock VPS juga melindungi jika koneksi runner sebelumnya terputus
-          # sementara proses deployment di server masih berjalan.
+          # The VPS lock also protects against a previous runner disconnecting
+          # while its deployment is still running on the server.
           exec 9>.git/deploy.lock
           flock -w 600 9
 
           if [[ "$(git branch --show-current)" != master ]]; then
-            printf '%s\n' "VPS harus berada pada branch master."
+            printf '%s\n' "VPS must be on the master branch."
             exit 1
           fi
 
           if [[ -n "$(git status --porcelain)" ]]; then
-            printf '%s\n' "Worktree VPS tidak bersih."
+            printf '%s\n' "VPS worktree is not clean."
             git status --short
             exit 1
           fi
 
           GIT_TERMINAL_PROMPT=0 git fetch origin master
 
-          # Commit harus berasal dari history master yang sekarang.
+          # The commit must be part of the current master history.
           git merge-base --is-ancestor "$expected_sha" origin/master
 
           current_sha="$(git rev-parse HEAD)"
 
-          # Jangan menurunkan versi jika deployment lebih baru sudah jalan.
+          # Do not downgrade if a newer deployment is already running.
           if [[ "$current_sha" != "$expected_sha" ]] &&
              git merge-base --is-ancestor "$expected_sha" "$current_sha"; then
-            printf '%s\n' "Commit ini lebih lama dari checkout VPS; dilewati."
+            printf '%s\n' "This commit is older than the VPS checkout; skipping."
             exit 0
           fi
 

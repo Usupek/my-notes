@@ -2,11 +2,11 @@
 
 ## 1. Objective
 
-Membuat aplikasi notes/blog berbasis markdown yang dapat dibaca oleh publik dan dikelola oleh admin melalui admin panel.
+Build a markdown-based notes/blog app that the public can read and the admin can manage through an admin panel.
 
-Aplikasi ini dibuat sebagai project pembelajaran full-stack engineering dan DevSecOps menggunakan Next.js, Go, PostgreSQL, Docker, Nginx, dan HTTPS.
+The app is a learning project for full-stack engineering and DevSecOps using Next.js, Go, PostgreSQL, Docker, Nginx, and HTTPS.
 
-Integrasi WhatsApp bot direncanakan sebagai fitur lanjutan pada V1.1 setelah fitur utama notes app stabil.
+A WhatsApp bot integration is planned as a follow-up feature in V1.1, once the core notes app is stable.
 
 ---
 
@@ -14,11 +14,11 @@ Integrasi WhatsApp bot direncanakan sebagai fitur lanjutan pada V1.1 setelah fit
 
 ### 2.1 Me/Admin
 
-Admin adalah pemilik aplikasi yang dapat mengelola notes melalui admin panel.
+The admin is the owner of the app and manages notes through the admin panel.
 
 ### 2.2 Public Visitors
 
-Public visitors adalah pengunjung umum yang hanya dapat membaca notes yang sudah dipublikasikan.
+Public visitors are general visitors who can only read published notes.
 
 ---
 
@@ -26,17 +26,17 @@ Public visitors adalah pengunjung umum yang hanya dapat membaca notes yang sudah
 
 ### 3.1 Admin
 
-Admin dapat:
+The admin can:
 
-- Login ke admin panel.
-- Membuat note baru.
-- Mengedit note yang sudah ada.
-- Menghapus note.
-- Mengimpor note dari file markdown.
-- Melihat live preview markdown saat membuat atau mengedit note.
-- Logout dari admin panel.
+- Log in to the admin panel.
+- Create a new note.
+- Edit an existing note.
+- Delete a note.
+- Import a note from a markdown file.
+- See a live markdown preview while creating or editing a note.
+- Log out of the admin panel.
 
-Setiap note memiliki data berikut:
+Each note has the following data:
 
 - ID
 - Title
@@ -49,12 +49,12 @@ Setiap note memiliki data berikut:
 
 ### 3.2 Public Visitors
 
-Public visitors dapat:
+Public visitors can:
 
-- Melihat daftar notes.
-- Melihat judul notes.
-- Membuka detail note.
-- Melihat konten markdown yang sudah di-render menjadi HTML yang aman.
+- See the list of notes.
+- See note titles.
+- Open a note's detail page.
+- See markdown content rendered as safe HTML.
 
 ---
 
@@ -62,56 +62,56 @@ Public visitors dapat:
 
 ### 4.1 Technology Requirements
 
-- Frontend menggunakan Next.js.
-- Backend menggunakan Go.
-- Database menggunakan PostgreSQL.
-- Aplikasi berjalan menggunakan Docker.
-- Production menggunakan Nginx sebagai reverse proxy.
-- Production menggunakan HTTPS.
-- Project menggunakan Makefile untuk menyederhanakan command development, testing, build, migration, dan deployment.
+- The frontend uses Next.js.
+- The backend uses Go.
+- The database uses PostgreSQL.
+- The app runs on Docker.
+- Production uses Nginx as a reverse proxy.
+- Production uses HTTPS.
+- The project uses a Makefile to simplify development, testing, build, migration, and deployment commands.
 
 ### 4.2 Security Requirements
 
-- Password admin tidak boleh disimpan dalam plaintext.
-- Hash password admin disimpan di environment variable server.
-- Admin harus login sebelum dapat mengakses fitur CRUD notes.
-- Session admin harus menggunakan cookie dengan atribut HttpOnly, Secure, dan SameSite.
-- Admin login harus dilindungi dari brute force menggunakan rate limiting.
-- Semua query database harus menggunakan parameterized query untuk mencegah SQL injection.
-- Markdown harus dirender secara aman untuk mencegah XSS.
-- Raw HTML dari markdown tidak boleh langsung dieksekusi di browser.
-- Secret tidak boleh disimpan di Git repository.
-- Database tidak boleh terekspos langsung ke internet.
-- Database hanya boleh diakses oleh backend melalui internal Docker network.
+- The admin password must not be stored in plaintext.
+- The admin password hash is stored in a server environment variable.
+- The admin must log in before accessing note CRUD features.
+- The admin session must use a cookie with the HttpOnly, Secure, and SameSite attributes.
+- Admin login must be protected against brute force with rate limiting.
+- All database queries must use parameterized queries to prevent SQL injection.
+- Markdown must be rendered safely to prevent XSS.
+- Raw HTML from markdown must not be executed directly in the browser.
+- Secrets must not be stored in the Git repository.
+- The database must not be exposed directly to the internet.
+- The database may only be accessed by the backend over the internal Docker network.
 
 ### 4.3 Markdown Import Requirements
 
-Admin dapat mengimpor file markdown dengan aturan berikut:
+The admin can import markdown files under the following rules:
 
-- Hanya menerima file dengan ekstensi `.md`.
-- Ukuran file markdown harus dibatasi.
-- Nama file harus divalidasi dan dinormalisasi.
-- File dengan nama mencurigakan seperti `file.php.md` harus ditolak atau ditangani secara aman.
-- Konten file markdown disimpan sebagai text markdown.
-- Konten markdown harus disanitasi atau dirender secara aman sebelum ditampilkan ke public visitors.
+- Only files with the `.md` extension are accepted.
+- Markdown file size must be limited.
+- File names must be validated and normalized.
+- Files with suspicious names such as `file.php.md` must be rejected or handled safely.
+- Markdown file content is stored as markdown text.
+- Markdown content must be sanitized or rendered safely before it is shown to public visitors.
 
 ### 4.4 Operational Requirements
 
-- Aplikasi harus memiliki health check endpoint.
-- Backend harus memiliki basic logging.
-- Database harus menggunakan persistent volume.
-- Deployment production harus dapat dijalankan menggunakan Docker Compose.
-- Nginx hanya membuka port 80 dan 443 ke internet.
-- Backend, frontend, dan database tidak boleh langsung terekspos ke internet selain melalui Nginx.
+- The app must have a health check endpoint.
+- The backend must have basic logging.
+- The database must use a persistent volume.
+- Production deployment must be runnable with Docker Compose.
+- Nginx only exposes ports 80 and 443 to the internet.
+- The backend, frontend, and database must not be exposed to the internet except through Nginx.
 
 ---
 
 ## 5. Out of Scope V1
 
-Fitur berikut tidak termasuk dalam V1:
+The following features are not part of V1:
 
 - Multi-user login.
-- Register/login untuk public user.
+- Register/login for public users.
 - Comment system.
 - Rich text editor.
 - Analytics.
@@ -126,13 +126,13 @@ Fitur berikut tidak termasuk dalam V1:
 
 ### WhatsApp Bot Integration
 
-Pada V1.1, aplikasi direncanakan memiliki integrasi WhatsApp bot.
+In V1.1, the app is planned to have a WhatsApp bot integration.
 
-Kemungkinan fitur WhatsApp bot:
+Possible WhatsApp bot features:
 
-- Admin dapat mengirim note melalui WhatsApp.
-- Bot dapat menyimpan pesan tertentu sebagai draft note.
-- Bot dapat mengambil daftar notes.
-- Bot dapat mencari note berdasarkan keyword.
+- The admin can send a note via WhatsApp.
+- The bot can save certain messages as draft notes.
+- The bot can fetch the list of notes.
+- The bot can search notes by keyword.
 
-Detail requirement WhatsApp bot akan dibuat di SRD V1.1.
+Detailed WhatsApp bot requirements will be written in SRD V1.1.

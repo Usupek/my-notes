@@ -24,7 +24,17 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 .wordmark { font: 700 13px/1 var(--mono); letter-spacing: .06em; text-transform: uppercase; }
 .wordmark span { color: var(--accent); }
 main { min-height: calc(100vh - 150px); }
-footer { width: min(1064px, calc(100% - 56px)); margin: 72px auto 0; padding: 24px 0 30px; border-top: 1px solid var(--line); color: var(--muted); font: 12px var(--mono); }
+footer { width: min(1064px, calc(100% - 56px)); margin: 72px auto 0; padding: 24px 0 30px; border-top: 1px solid var(--line); color: var(--muted); font: 12px var(--mono); display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.rss-button { display: inline-flex; align-items: center; gap: 8px; padding: 8px 13px; border: 1px solid var(--ink); color: var(--ink); font: 700 10px var(--mono); letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; transition: color .18s ease, background .18s ease, border-color .18s ease; }
+.rss-button svg { color: var(--accent); transition: color .18s ease; }
+.rss-button:hover { border-color: var(--accent); background: var(--accent); color: white; }
+.rss-button:hover svg { color: white; }
+.subscribe-page .eyebrow { display: inline-flex; align-items: center; gap: 8px; }
+.subscribe-page .markdown p { margin-top: 0; }
+.feed-url { margin: 32px 0 0; display: flex; gap: 10px; }
+.feed-url input { flex: 1; min-width: 0; height: 40px; margin: 0; padding: 0 14px; border: 1px solid var(--line); border-radius: 0; background: var(--panel); color: var(--ink); font: 13px var(--mono); }
+.feed-url .rss-button { min-width: 112px; justify-content: center; background: var(--paper); cursor: pointer; }
+.platform-list { margin-top: 48px; }
 .shell { width: min(1064px, calc(100% - 56px)); margin: 0 auto; }
 
 .home { padding-top: 68px; }
@@ -164,6 +174,8 @@ input:focus, textarea:focus { border-color: var(--accent); }
 .preview-pane { min-width: 0; }.preview-pane .markdown { min-height: 68vh; padding: 20px 34px 52px; }
 
 @media (max-width: 760px) {
+  .feed-url { flex-direction: column; }
+  .feed-url input { flex: none; }
   .site-header, footer, .shell { width: calc(100% - 36px); }
   .site-header { height: 68px; }
   .home { padding-top: 46px; }

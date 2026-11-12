@@ -2,11 +2,11 @@
 
 ## 1. Overview
 
-Database menggunakan PostgreSQL untuk menyimpan metadata notes, tags, relasi tags, dan admin sessions.
+The database uses PostgreSQL to store note metadata, tags, tag relations, and admin sessions.
 
-Isi utama note tidak disimpan di database. Konten note disimpan sebagai file markdown di filesystem dalam folder berdasarkan UUID note.
+The main note content is not stored in the database. Note content is stored as a markdown file on the filesystem, in a folder named after the note's UUID.
 
-Setiap note memiliki folder sendiri yang berisi file markdown dan assets seperti gambar.
+Each note has its own folder containing the markdown file and assets such as images.
 
 ---
 
@@ -14,38 +14,38 @@ Setiap note memiliki folder sendiri yang berisi file markdown dan assets seperti
 
 ### 2.1 notes
 
-Table `notes` digunakan untuk menyimpan metadata note.
+The `notes` table stores note metadata.
 
 | Column | Type | Constraint | Description |
 |---|---|---|---|
-| id | UUID | Primary Key | Unique identifier untuk note |
-| title | TEXT | NOT NULL | Judul note yang ditampilkan di homepage |
-| markdown_file_path | TEXT | NOT NULL | Path file markdown milik note |
-| is_published | BOOLEAN | NOT NULL, DEFAULT true | Status apakah note dapat dilihat public |
-| created_at | TIMESTAMPTZ | NOT NULL, DEFAULT now() | Waktu note dibuat |
-| updated_at | TIMESTAMPTZ | NOT NULL, DEFAULT now() | Waktu note terakhir diubah |
+| id | UUID | Primary Key | Unique identifier for the note |
+| title | TEXT | NOT NULL | Note title shown on the homepage |
+| markdown_file_path | TEXT | NOT NULL | Path to the note's markdown file |
+| is_published | BOOLEAN | NOT NULL, DEFAULT true | Whether the note is publicly visible |
+| created_at | TIMESTAMPTZ | NOT NULL, DEFAULT now() | When the note was created |
+| updated_at | TIMESTAMPTZ | NOT NULL, DEFAULT now() | When the note was last modified |
 
 ---
 
 ### 2.2 tags
 
-Table `tags` digunakan untuk menyimpan kategori note, seperti `work`, `study`, `explore`, dan lainnya.
+The `tags` table stores note categories, such as `work`, `study`, `explore`, and so on.
 
 | Column | Type | Constraint | Description |
 |---|---|---|---|
-| id | UUID | Primary Key | Unique identifier untuk tag |
-| name | TEXT | NOT NULL, UNIQUE | Nama tag |
+| id | UUID | Primary Key | Unique identifier for the tag |
+| name | TEXT | NOT NULL, UNIQUE | Tag name |
 
 ---
 
 ### 2.3 note_tags
 
-Table `note_tags` digunakan untuk menghubungkan notes dengan tags.
+The `note_tags` table links notes to tags.
 
 | Column | Type | Constraint | Description |
 |---|---|---|---|
-| note_id | UUID | Foreign Key to notes.id | ID note |
-| tag_id | UUID | Foreign Key to tags.id | ID tag |
+| note_id | UUID | Foreign Key to notes.id | Note ID |
+| tag_id | UUID | Foreign Key to tags.id | Tag ID |
 
 Primary key:
 
@@ -58,13 +58,13 @@ Primary key:
 
 ### 2.4 admin_sessions
 
-Table `admin_sessions` digunakan untuk menyimpan session login admin.
+The `admin_sessions` table stores admin login sessions.
 
-Password admin tidak disimpan di database. Hash password admin disimpan di environment variable server.
+The admin password is not stored in the database. The admin password hash is stored in a server environment variable.
 
 | Column | Type | Constraint | Description |
 |---|---|---|---|
-| id | UUID | Primary Key | Unique identifier untuk session |
-| session_token_hash | TEXT | NOT NULL, UNIQUE | Hash dari session token |
-| created_at | TIMESTAMPTZ | NOT NULL, DEFAULT now() | Waktu session dibuat |
-| expires_at | TIMESTAMPTZ | NOT NULL | Waktu session expired |
+| id | UUID | Primary Key | Unique identifier for the session |
+| session_token_hash | TEXT | NOT NULL, UNIQUE | Hash of the session token |
+| created_at | TIMESTAMPTZ | NOT NULL, DEFAULT now() | When the session was created |
+| expires_at | TIMESTAMPTZ | NOT NULL | When the session expires |

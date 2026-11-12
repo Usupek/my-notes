@@ -7,7 +7,7 @@ import type { Note } from "@/lib/types";
 async function getNote(id: string): Promise<Note | null> {
   const response = await fetch(serverApi(`/notes/${id}`), { next: { revalidate: 30 } });
   if (response.status === 404 || response.status === 400) return null;
-  if (!response.ok) throw new Error("Gagal memuat catatan");
+  if (!response.ok) throw new Error("Failed to load note");
   return (await response.json()).data;
 }
 

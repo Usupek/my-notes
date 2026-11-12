@@ -2,20 +2,20 @@
 
 ## 1. Overview
 
-Dokumen ini menjelaskan threat model dan security plan untuk Markdown Notes App V1.
+This document describes the threat model and security plan for Markdown Notes App V1.
 
-Aplikasi ini adalah notes/blog berbasis markdown yang dapat dibaca oleh public visitors dan dikelola oleh admin melalui admin panel.
+The app is a markdown-based notes/blog that public visitors can read and the admin manages through an admin panel.
 
-Aplikasi menggunakan:
+The app uses:
 
-- Next.js untuk frontend.
-- Go untuk backend API.
-- PostgreSQL untuk metadata notes, tags, dan admin sessions.
-- Filesystem storage untuk file markdown dan gambar.
-- Docker untuk containerization.
-- Nginx untuk reverse proxy dan HTTPS di production.
+- Next.js for the frontend.
+- Go for the backend API.
+- PostgreSQL for note metadata, tags, and admin sessions.
+- Filesystem storage for markdown files and images.
+- Docker for containerization.
+- Nginx as reverse proxy and for HTTPS in production.
 
-Konten note tidak disimpan langsung di database. Konten note disimpan sebagai file markdown di filesystem. Database hanya menyimpan metadata note.
+Note content is not stored directly in the database. It is stored as markdown files on the filesystem. The database only stores note metadata.
 
 ---
 
@@ -69,38 +69,38 @@ data/
 
 ## 3. Security Goals
 
-Tujuan keamanan utama aplikasi:
+The app's main security goals:
 
-1. Public visitor hanya dapat membaca notes yang published.
-2. Admin harus login sebelum melakukan create, update, delete, import, dan upload asset.
-3. Password admin tidak boleh disimpan dalam plaintext.
-4. Session admin harus aman dari pencurian dan penyalahgunaan.
-5. Markdown tidak boleh menyebabkan XSS.
-6. File upload tidak boleh menyebabkan remote code execution, path traversal, atau file disclosure.
-7. Database tidak boleh terekspos langsung ke internet.
-8. Secret tidak boleh masuk ke Git repository.
-9. Data notes, gambar, dan metadata harus dapat dibackup dan direstore.
-10. Production traffic harus menggunakan HTTPS.
+1. Public visitors can only read published notes.
+2. The admin must log in before creating, updating, deleting, importing, or uploading assets.
+3. The admin password must not be stored in plaintext.
+4. The admin session must be safe from theft and misuse.
+5. Markdown must not cause XSS.
+6. File uploads must not cause remote code execution, path traversal, or file disclosure.
+7. The database must not be exposed directly to the internet.
+8. Secrets must not end up in the Git repository.
+9. Notes, images, and metadata must be backed up and restorable.
+10. Production traffic must use HTTPS.
 
 ---
 
 ## 4. Assets
 
-Assets yang harus dilindungi:
+Assets that must be protected:
 
 | Asset | Description |
 |---|---|
-| Admin password hash | Hash password admin yang disimpan di environment variable server |
-| Admin session token | Token session admin yang dikirim melalui cookie |
-| Admin session token hash | Hash session token yang disimpan di database |
-| Markdown notes | File `.md` yang berisi konten utama note |
-| Note images/assets | Gambar yang berhubungan dengan note |
-| PostgreSQL database | Metadata notes, tags, note_tags, dan admin_sessions |
-| Notes storage directory | Folder persistent yang menyimpan markdown dan images |
-| Environment variables | Secret seperti database password dan admin password hash |
-| Production server | VPS atau server tempat aplikasi berjalan |
-| Docker volumes | Persistent volume untuk database dan notes storage |
-| Nginx configuration | Konfigurasi reverse proxy, HTTPS, dan security headers |
+| Admin password hash | Admin password hash stored in a server environment variable |
+| Admin session token | Admin session token sent via cookie |
+| Admin session token hash | Session token hash stored in the database |
+| Markdown notes | `.md` files containing the main note content |
+| Note images/assets | Images belonging to a note |
+| PostgreSQL database | Note metadata, tags, note_tags, and admin_sessions |
+| Notes storage directory | Persistent folder holding markdown and images |
+| Environment variables | Secrets such as the database password and admin password hash |
+| Production server | The VPS or server running the app |
+| Docker volumes | Persistent volumes for the database and notes storage |
+| Nginx configuration | Reverse proxy, HTTPS, and security header configuration |
 
 ---
 
@@ -110,21 +110,21 @@ Assets yang harus dilindungi:
 
 | Actor | Description |
 |---|---|
-| Public Visitor | User umum yang hanya membaca notes |
-| Admin | Pemilik aplikasi yang dapat login dan mengelola notes |
-| Backend API | Service Go yang mengelola business logic, database, dan filesystem |
-| Frontend App | Next.js app yang menampilkan UI |
-| Nginx | Reverse proxy dan SSL termination |
+| Public Visitor | A general user who only reads notes |
+| Admin | The app owner who can log in and manage notes |
+| Backend API | Go service handling business logic, the database, and the filesystem |
+| Frontend App | Next.js app that renders the UI |
+| Nginx | Reverse proxy and SSL termination |
 
 ### 5.2 Potential Threat Actors
 
 | Actor | Description |
 |---|---|
-| Anonymous attacker | Orang dari internet yang mencoba menyerang aplikasi |
-| Bot/script | Automated bot yang mencoba brute force login atau scan endpoint |
-| Malicious visitor | Visitor yang mencoba exploit public endpoint |
-| Compromised admin browser | Browser admin yang terkena malware atau extension berbahaya |
-| Accidental admin mistake | Kesalahan admin seperti upload file salah atau salah konfigurasi server |
+| Anonymous attacker | Someone on the internet trying to attack the app |
+| Bot/script | Automated bot attempting login brute force or endpoint scanning |
+| Malicious visitor | A visitor trying to exploit public endpoints |
+| Compromised admin browser | The admin's browser infected by malware or a malicious extension |
+| Accidental admin mistake | Admin errors such as uploading the wrong file or misconfiguring the server |
 
 ---
 
@@ -132,20 +132,20 @@ Assets yang harus dilindungi:
 
 ### 6.1 Public Internet to Nginx
 
-Semua request dari internet harus masuk melalui Nginx.
+All requests from the internet must go through Nginx.
 
 Rules:
 
-- Production harus menggunakan HTTPS.
-- Port public hanya 80 dan 443.
-- Request HTTP harus redirect ke HTTPS.
-- Nginx meneruskan request ke frontend atau backend sesuai path.
+- Production must use HTTPS.
+- The only public ports are 80 and 443.
+- HTTP requests must redirect to HTTPS.
+- Nginx forwards requests to the frontend or backend based on path.
 
 ---
 
 ### 6.2 Nginx to Frontend
 
-Nginx meneruskan request halaman web ke Next.js frontend.
+Nginx forwards web page requests to the Next.js frontend.
 
 Examples:
 
@@ -157,15 +157,15 @@ Examples:
 
 Security concern:
 
-- Frontend tidak boleh menyimpan secret.
-- Frontend tidak boleh punya akses langsung ke database.
-- Frontend tidak boleh membaca filesystem storage secara langsung.
+- The frontend must not hold secrets.
+- The frontend must not have direct database access.
+- The frontend must not read filesystem storage directly.
 
 ---
 
 ### 6.3 Nginx to Backend API
 
-Nginx meneruskan request API ke Go backend.
+Nginx forwards API requests to the Go backend.
 
 Examples:
 
@@ -177,38 +177,38 @@ Examples:
 
 Security concern:
 
-- Backend harus validasi semua input.
-- Backend harus melakukan authentication dan authorization.
-- Backend harus mencegah SQL injection.
-- Backend harus mencegah path traversal.
-- Backend harus mengontrol akses ke markdown files dan assets.
+- The backend must validate all input.
+- The backend must perform authentication and authorization.
+- The backend must prevent SQL injection.
+- The backend must prevent path traversal.
+- The backend must control access to markdown files and assets.
 
 ---
 
 ### 6.4 Backend API to PostgreSQL
 
-Backend adalah satu-satunya service yang boleh mengakses PostgreSQL.
+The backend is the only service allowed to access PostgreSQL.
 
 Rules:
 
-- PostgreSQL tidak boleh expose port ke internet di production.
-- PostgreSQL hanya berada di Docker internal network.
-- Query harus menggunakan parameterized query.
-- Database credentials disimpan di environment variable server.
+- PostgreSQL must not expose a port to the internet in production.
+- PostgreSQL lives only on the internal Docker network.
+- Queries must be parameterized.
+- Database credentials are stored in server environment variables.
 
 ---
 
 ### 6.5 Backend API to Filesystem Storage
 
-Backend membaca dan menulis file markdown serta images.
+The backend reads and writes markdown files and images.
 
 Rules:
 
-- Backend hanya boleh mengakses notes storage directory.
-- Backend tidak boleh serve arbitrary file.
-- Path harus divalidasi dan dinormalisasi.
-- Upload file harus divalidasi.
-- Filesystem storage harus persistent.
+- The backend may only access the notes storage directory.
+- The backend must not serve arbitrary files.
+- Paths must be validated and normalized.
+- File uploads must be validated.
+- Filesystem storage must be persistent.
 
 ---
 
@@ -220,7 +220,7 @@ Rules:
 
 ### Threat
 
-Attacker mencoba menebak password admin dengan mengirim banyak request ke endpoint login.
+An attacker tries to guess the admin password by sending many requests to the login endpoint.
 
 Target endpoint:
 
@@ -230,25 +230,25 @@ POST /api/v1/admin/login
 
 ### Impact
 
-- Attacker berhasil login sebagai admin.
-- Attacker dapat membuat, mengedit, atau menghapus notes.
-- Attacker dapat upload file berbahaya.
-- Attacker dapat mengubah konten public.
+- The attacker logs in as admin.
+- The attacker can create, edit, or delete notes.
+- The attacker can upload malicious files.
+- The attacker can change public content.
 
 ### Mitigation
 
-- Gunakan password admin yang kuat.
-- Password admin tidak disimpan plaintext.
-- Simpan hash password admin di environment variable server.
-- Gunakan rate limiting untuk endpoint login.
-- Gunakan response error yang generic.
-- Jangan bedakan error antara password salah dan user tidak ditemukan.
-- Log failed login attempt tanpa mencatat password.
-- Pertimbangkan temporary lockout jika terlalu banyak gagal login.
+- Use a strong admin password.
+- The admin password is not stored in plaintext.
+- Store the admin password hash in a server environment variable.
+- Rate limit the login endpoint.
+- Use generic error responses.
+- Do not distinguish between a wrong password and a user not found.
+- Log failed login attempts without logging the password.
+- Consider a temporary lockout after too many failed logins.
 
 ### Implementation Notes
 
-Contoh error response:
+Example error response:
 
 ```json
 {
@@ -259,11 +259,11 @@ Contoh error response:
 }
 ```
 
-Jangan mengembalikan error seperti:
+Do not return errors such as:
 
 ```txt
-Password salah
-Admin account ditemukan
+Wrong password
+Admin account found
 Hash mismatch
 ```
 
@@ -273,32 +273,32 @@ Hash mismatch
 
 ### Threat
 
-Password admin bocor karena disimpan dalam plaintext di `.env`, database, log, atau repository.
+The admin password leaks because it is stored in plaintext in `.env`, the database, logs, or the repository.
 
 ### Impact
 
 - Admin account takeover.
-- Full control terhadap notes.
-- Potensi akses ke server lain jika password reused.
+- Full control over notes.
+- Potential access to other servers if the password is reused.
 
 ### Mitigation
 
-- Jangan simpan password admin asli.
-- Simpan hanya hash password admin.
-- Gunakan algoritma hashing password yang aman seperti bcrypt atau Argon2id.
-- Jangan log password.
-- Jangan commit `.env`.
-- Gunakan `.env.example` tanpa secret asli.
+- Do not store the real admin password.
+- Store only the admin password hash.
+- Use a secure password hashing algorithm such as bcrypt or Argon2id.
+- Do not log passwords.
+- Do not commit `.env`.
+- Use `.env.example` without real secrets.
 
 ### Environment Variable
 
-Gunakan:
+Use:
 
 ```env
 ADMIN_PASSWORD_HASH=...
 ```
 
-Jangan gunakan:
+Do not use:
 
 ```env
 ADMIN_PASSWORD=my-secret-password
@@ -310,33 +310,33 @@ ADMIN_PASSWORD=my-secret-password
 
 ### Threat
 
-Session token admin dicuri dan digunakan attacker untuk mengakses admin panel.
+The admin session token is stolen and used by an attacker to access the admin panel.
 
 ### Attack vectors:
 
-- Network sniffing jika tidak memakai HTTPS.
-- XSS yang mencuri session.
-- Cookie tidak menggunakan atribut security.
-- Session token bocor di log.
-- Session token disimpan di database dalam plaintext.
+- Network sniffing when HTTPS is not used.
+- XSS that steals the session.
+- Cookie missing security attributes.
+- Session token leaking into logs.
+- Session token stored in plaintext in the database.
 
 ### Impact
 
-- Attacker bisa menjadi admin.
-- Attacker bisa mengubah dan menghapus notes.
-- Attacker bisa upload assets.
+- The attacker can become admin.
+- The attacker can modify and delete notes.
+- The attacker can upload assets.
 
 ### Mitigation
 
-- Production wajib HTTPS.
-- Cookie session menggunakan `HttpOnly`.
-- Cookie session menggunakan `Secure`.
-- Cookie session menggunakan `SameSite`.
-- Session token memiliki expiry.
-- Database hanya menyimpan hash session token.
-- Logout menghapus session dari database.
-- Jangan log session token.
-- Regenerate session saat login.
+- Production must use HTTPS.
+- The session cookie uses `HttpOnly`.
+- The session cookie uses `Secure`.
+- The session cookie uses `SameSite`.
+- Session tokens expire.
+- The database only stores the session token hash.
+- Logout deletes the session from the database.
+- Do not log session tokens.
+- Regenerate the session on login.
 
 ### Cookie Requirements
 
@@ -361,7 +361,7 @@ Set-Cookie: admin_session=<token>; HttpOnly; Secure; SameSite=Lax; Path=/; Max-A
 
 ### Threat
 
-Attacker menyisipkan script berbahaya di markdown content.
+An attacker injects a malicious script into markdown content.
 
 Example malicious markdown:
 
@@ -369,7 +369,7 @@ Example malicious markdown:
 <script>alert("xss")</script>
 ```
 
-Atau:
+Or:
 
 ```md
 <img src=x onerror=alert(1)>
@@ -377,30 +377,30 @@ Atau:
 
 ### Impact
 
-- Script berjalan di browser visitor.
-- Session atau data user bisa dicuri.
-- Public page menjadi malicious.
-- Admin browser dapat diserang jika membuka preview markdown.
+- The script runs in the visitor's browser.
+- Sessions or user data can be stolen.
+- The public page becomes malicious.
+- The admin's browser can be attacked when opening the markdown preview.
 
 ### Mitigation
 
-- Jangan render raw HTML dari markdown.
-- Gunakan markdown renderer yang aman.
-- Gunakan sanitization.
-- Jangan menggunakan `dangerouslySetInnerHTML` untuk markdown.
-- Sanitasi URL pada link dan image.
-- Blokir protocol berbahaya seperti `javascript:`.
-- Preview markdown di admin juga harus aman.
+- Do not render raw HTML from markdown.
+- Use a safe markdown renderer.
+- Use sanitization.
+- Do not use `dangerouslySetInnerHTML` for markdown.
+- Sanitize link and image URLs.
+- Block dangerous protocols such as `javascript:`.
+- The admin markdown preview must be safe too.
 
 ### Frontend Requirements
 
-Markdown renderer harus:
+The markdown renderer must:
 
-- Mendukung markdown basic.
-- Mendukung GFM jika dibutuhkan.
-- Menolak raw HTML.
-- Melakukan sanitization.
-- Memvalidasi link dan image URL.
+- Support basic markdown.
+- Support GFM if needed.
+- Reject raw HTML.
+- Sanitize output.
+- Validate link and image URLs.
 
 ---
 
@@ -408,7 +408,7 @@ Markdown renderer harus:
 
 ### Threat
 
-Attacker mengirim input yang memanipulasi SQL query.
+An attacker sends input that manipulates a SQL query.
 
 Example:
 
@@ -435,13 +435,13 @@ Target input:
 
 ### Mitigation
 
-- Semua query harus menggunakan parameterized query.
-- Jangan concatenate input user langsung ke SQL.
-- Validasi UUID.
-- Validasi pagination `page` dan `limit`.
-- Validasi tag name.
-- Batasi panjang input title dan tag.
-- Gunakan database user dengan permission minimal.
+- All queries must be parameterized.
+- Never concatenate user input directly into SQL.
+- Validate UUIDs.
+- Validate the `page` and `limit` pagination params.
+- Validate tag names.
+- Limit the length of title and tag input.
+- Use a database user with minimal permissions.
 
 ### Bad Example
 
@@ -462,7 +462,7 @@ rows, err := db.QueryContext(ctx, query, title)
 
 ### Threat
 
-Attacker mencoba membaca file di luar notes storage directory.
+An attacker tries to read files outside the notes storage directory.
 
 Example malicious request:
 
@@ -470,7 +470,7 @@ Example malicious request:
 GET /api/v1/notes/{id}/assets/../../../../.env
 ```
 
-Atau filename upload:
+Or an upload filename:
 
 ```txt
 ../../evil.png
@@ -478,30 +478,30 @@ Atau filename upload:
 
 ### Impact
 
-- Secret `.env` bocor.
-- File system server terbaca.
-- Config production bocor.
-- Private files dapat diakses.
+- `.env` secrets leak.
+- The server filesystem is readable.
+- Production config leaks.
+- Private files become accessible.
 
 ### Mitigation
 
-- Validasi filename.
-- Tolak `..`, `/`, `\`, null byte, dan karakter berbahaya.
-- Normalize path sebelum akses file.
-- Setelah path dinormalisasi, pastikan final path tetap berada di dalam notes storage directory.
-- Jangan menerima arbitrary path dari user.
-- Asset endpoint hanya boleh membaca file dari folder `images` milik note.
-- Markdown file path sebaiknya dibentuk oleh backend, bukan dari input user.
+- Validate filenames.
+- Reject `..`, `/`, `\`, null bytes, and other dangerous characters.
+- Normalize the path before accessing the file.
+- After normalizing, make sure the final path is still inside the notes storage directory.
+- Never accept arbitrary paths from users.
+- The asset endpoint may only read files from the note's `images` folder.
+- The markdown file path should be built by the backend, not taken from user input.
 
 ### Safe Path Rule
 
-Backend harus membangun path seperti ini:
+The backend must build paths like this:
 
 ```txt
 data/notes/{note_id}/images/{safe_filename}
 ```
 
-Bukan menerima full path dari user.
+Rather than accepting a full path from the user.
 
 ---
 
@@ -509,7 +509,7 @@ Bukan menerima full path dari user.
 
 ### Threat
 
-Admin import file markdown yang berbahaya, terlalu besar, atau memiliki nama file mencurigakan.
+The admin imports a markdown file that is malicious, too large, or has a suspicious file name.
 
 Examples:
 
@@ -522,33 +522,33 @@ note.md%00.png
 
 ### Impact
 
-- XSS saat markdown dirender.
-- Storage penuh.
+- XSS when the markdown is rendered.
+- Storage fills up.
 - Path traversal.
 - File overwrite.
 - Unexpected parser behavior.
 
 ### Mitigation
 
-- Hanya menerima ekstensi `.md`.
-- Tolak filename yang memiliki multiple dangerous extension seperti `.php.md`.
-- Validasi ukuran file.
-- Validasi MIME type jika memungkinkan.
+- Only accept the `.md` extension.
+- Reject filenames with multiple dangerous extensions such as `.php.md`.
+- Validate file size.
+- Validate the MIME type where possible.
 - Normalize filename.
-- Jangan gunakan nama file asli sebagai path final utama.
-- Simpan file markdown sebagai `{note_id}-note.md`.
-- Markdown tetap harus dirender secara aman.
-- Batasi maksimum ukuran markdown berdasarkan config.
+- Do not use the original file name as the final storage path.
+- Store the markdown file as `{note_id}-note.md`.
+- Markdown must still be rendered safely.
+- Cap the maximum markdown size via config.
 
 ### Recommended Rule
 
-Walaupun user upload file bernama:
+Even if the user uploads a file named:
 
 ```txt
 my-note.md
 ```
 
-Backend tetap menyimpan sebagai:
+The backend still stores it as:
 
 ```txt
 data/notes/{note_id}/{note_id}-note.md
@@ -560,7 +560,7 @@ data/notes/{note_id}/{note_id}-note.md
 
 ### Threat
 
-Attacker upload file berbahaya yang menyamar sebagai image.
+An attacker uploads a malicious file disguised as an image.
 
 Examples:
 
@@ -574,15 +574,15 @@ huge-image.jpg
 
 ### Impact
 
-- File berbahaya tersimpan di server.
-- Storage penuh.
-- Browser menjalankan payload.
+- A malicious file is stored on the server.
+- Storage fills up.
+- The browser executes the payload.
 - Path traversal.
 - File overwrite.
 
 ### Mitigation
 
-- Hanya izinkan tipe file berikut:
+- Only allow the following file types:
 
 ```txt
 .png
@@ -592,16 +592,16 @@ huge-image.jpg
 .gif
 ```
 
-- Jangan izinkan `.svg` untuk V1 karena bisa membawa script.
-- Validasi extension.
-- Validasi MIME type.
-- Batasi ukuran file.
+- Do not allow `.svg` in V1 because it can carry scripts.
+- Validate the extension.
+- Validate the MIME type.
+- Limit file size.
 - Normalize filename.
-- Tolak path traversal.
-- Jangan execute uploaded file.
-- Serve file dengan Content-Type yang benar.
-- Gunakan `Content-Disposition` jika diperlukan.
-- Jika filename sudah ada, rename otomatis atau reject.
+- Reject path traversal.
+- Never execute uploaded files.
+- Serve files with the correct Content-Type.
+- Use `Content-Disposition` where needed.
+- If the filename already exists, rename automatically or reject.
 
 ### Recommended Allowed Image Types V1
 
@@ -619,7 +619,7 @@ huge-image.jpg
 
 ### Threat
 
-Public visitor mencoba membaca note yang belum published.
+A public visitor tries to read an unpublished note.
 
 Example:
 
@@ -629,15 +629,15 @@ GET /api/v1/notes/{draft_note_id}
 
 ### Impact
 
-- Draft/private note bocor ke public.
-- Konten yang belum siap publish dapat dibaca orang lain.
+- Draft/private notes leak to the public.
+- Content not ready for publishing can be read by others.
 
 ### Mitigation
 
-- Public endpoint hanya mengembalikan note dengan `is_published = true`.
-- Admin endpoint boleh membaca draft hanya jika session valid.
-- Asset milik draft note tidak boleh bisa diakses dari public asset endpoint.
-- Jangan expose draft note di public list.
+- Public endpoints only return notes with `is_published = true`.
+- Admin endpoints may read drafts only with a valid session.
+- Assets of draft notes must not be reachable through the public asset endpoint.
+- Do not expose draft notes in the public list.
 
 ### Public Endpoint Rule
 
@@ -647,7 +647,7 @@ GET /api/v1/notes/:id
 GET /api/v1/notes/:id/assets/:filename
 ```
 
-harus selalu mengecek:
+must always check:
 
 ```txt
 is_published = true
@@ -659,21 +659,21 @@ is_published = true
 
 ### Threat
 
-Attacker menebak UUID note atau asset URL untuk mengakses data yang tidak seharusnya.
+An attacker guesses a note UUID or asset URL to access data they should not see.
 
 ### Impact
 
-- Draft note terbaca.
-- Asset dari draft note terbaca.
+- Draft notes are readable.
+- Draft note assets are readable.
 - Data leak.
 
 ### Mitigation
 
-- UUID tetap harus dianggap sebagai identifier, bukan security boundary.
-- Selalu cek authorization.
-- Public hanya boleh mengakses published note.
-- Admin endpoint harus membutuhkan valid session.
-- Asset endpoint harus cek note ownership/status.
+- UUIDs must be treated as identifiers, not as a security boundary.
+- Always check authorization.
+- The public may only access published notes.
+- Admin endpoints must require a valid session.
+- The asset endpoint must check note ownership/status.
 
 ---
 
@@ -681,11 +681,11 @@ Attacker menebak UUID note atau asset URL untuk mengakses data yang tidak seharu
 
 ### Threat
 
-Admin yang sedang login dipaksa browser-nya mengirim request berbahaya ke aplikasi.
+A logged-in admin's browser is tricked into sending a malicious request to the app.
 
 Example:
 
-Admin sedang login, lalu membuka website malicious yang membuat request:
+The admin is logged in and then opens a malicious website that sends:
 
 ```http
 POST /api/v1/admin/notes
@@ -693,21 +693,21 @@ POST /api/v1/admin/notes
 
 ### Impact
 
-- Note dibuat tanpa niat admin.
-- Note diedit atau dihapus.
-- Asset diupload atau dihapus.
+- A note is created without the admin's intent.
+- Notes are edited or deleted.
+- Assets are uploaded or deleted.
 
 ### Mitigation
 
-- Gunakan `SameSite=Lax` atau `SameSite=Strict` pada cookie.
-- Validasi `Origin` atau `Referer` untuk endpoint admin mutation.
-- Pertimbangkan CSRF token untuk POST, PUT, PATCH, DELETE.
-- CORS tidak boleh wildcard untuk admin endpoint.
-- Admin mutation harus hanya menerima `Content-Type` yang expected.
+- Use `SameSite=Lax` or `SameSite=Strict` on the cookie.
+- Validate `Origin` or `Referer` on admin mutation endpoints.
+- Consider CSRF tokens for POST, PUT, PATCH, DELETE.
+- CORS must not use a wildcard for admin endpoints.
+- Admin mutations must only accept the expected `Content-Type`.
 
 ### Admin Mutation Endpoints
 
-Endpoint berikut perlu proteksi CSRF:
+The following endpoints need CSRF protection:
 
 ```txt
 POST   /api/v1/admin/notes
@@ -725,7 +725,7 @@ POST   /api/v1/admin/logout
 
 ### Threat
 
-CORS terlalu permisif sehingga origin tidak dikenal dapat mengakses API.
+CORS is too permissive, so unknown origins can access the API.
 
 Example dangerous config:
 
@@ -736,17 +736,17 @@ Access-Control-Allow-Credentials: true
 
 ### Impact
 
-- Admin session bisa disalahgunakan dari origin lain.
-- Browser dapat mengirim credential ke API dari website malicious.
+- The admin session can be abused from another origin.
+- The browser can send credentials to the API from a malicious website.
 - Data leak.
 
 ### Mitigation
 
-- Production hanya allow domain frontend resmi.
-- Jangan gunakan wildcard origin untuk credentialed requests.
-- Batasi method yang diizinkan.
-- Batasi headers yang diizinkan.
-- Admin endpoint harus lebih ketat.
+- Production only allows the official frontend domain.
+- Never use a wildcard origin for credentialed requests.
+- Restrict allowed methods.
+- Restrict allowed headers.
+- Admin endpoints must be stricter.
 
 ### Recommended Production CORS
 
@@ -762,7 +762,7 @@ Allowed Credentials: true
 
 ### Threat
 
-PostgreSQL dapat diakses langsung dari internet.
+PostgreSQL is reachable directly from the internet.
 
 ### Impact
 
@@ -773,23 +773,23 @@ PostgreSQL dapat diakses langsung dari internet.
 
 ### Mitigation
 
-- Jangan expose port PostgreSQL di production.
-- PostgreSQL hanya berada di Docker internal network.
-- Gunakan database password yang kuat.
-- Gunakan user database dengan permission sesuai kebutuhan.
-- Backup database secara rutin.
-- Jangan gunakan default password.
+- Do not expose the PostgreSQL port in production.
+- PostgreSQL lives only on the internal Docker network.
+- Use a strong database password.
+- Use a database user with only the permissions it needs.
+- Back up the database regularly.
+- Do not use default passwords.
 
 ### Production Rule
 
-Jangan gunakan:
+Do not use:
 
 ```yaml
 ports:
   - "5432:5432"
 ```
 
-untuk database di production.
+for the database in production.
 
 ---
 
@@ -797,7 +797,7 @@ untuk database di production.
 
 ### Threat
 
-Secret bocor ke GitHub, log, Docker image, atau error response.
+Secrets leak to GitHub, logs, Docker images, or error responses.
 
 Secrets include:
 
@@ -817,13 +817,13 @@ Secrets include:
 
 ### Mitigation
 
-- `.env` harus masuk `.gitignore`.
-- Gunakan `.env.example` tanpa secret asli.
-- Gunakan GitHub Secrets untuk CI/CD.
-- Jangan log environment variables.
-- Jangan masukkan secret ke Docker image saat build.
-- Rotate secret jika bocor.
-- Jangan tampilkan stack trace di production response.
+- `.env` must be in `.gitignore`.
+- Use `.env.example` without real secrets.
+- Use GitHub Secrets for CI/CD.
+- Do not log environment variables.
+- Do not bake secrets into Docker images at build time.
+- Rotate secrets if they leak.
+- Do not show stack traces in production responses.
 
 ### `.gitignore` Requirement
 
@@ -839,27 +839,27 @@ Secrets include:
 
 ### Threat
 
-Container berjalan dengan privilege berlebihan atau expose port tidak perlu.
+Containers run with excessive privileges or expose unnecessary ports.
 
 ### Impact
 
-- Container escape risk meningkat.
-- Internal service terekspos.
-- Attack surface membesar.
+- Increased container escape risk.
+- Internal services are exposed.
+- Larger attack surface.
 
 ### Mitigation
 
-- Jalankan container app sebagai non-root user jika memungkinkan.
-- Expose hanya port yang dibutuhkan.
-- Di production, hanya Nginx yang expose port 80 dan 443.
-- Database tidak expose public port.
-- Gunakan Docker internal network.
-- Gunakan persistent volume untuk database dan notes storage.
-- Jangan mount Docker socket ke container app.
+- Run app containers as a non-root user where possible.
+- Expose only the ports that are needed.
+- In production, only Nginx exposes ports 80 and 443.
+- The database does not expose a public port.
+- Use an internal Docker network.
+- Use persistent volumes for the database and notes storage.
+- Do not mount the Docker socket into app containers.
 
 ### Production Exposure Rule
 
-Public internet hanya boleh mengakses:
+The public internet may only access:
 
 ```txt
 80
@@ -872,31 +872,31 @@ Public internet hanya boleh mengakses:
 
 ### Threat
 
-Aplikasi production berjalan tanpa HTTPS.
+The production app runs without HTTPS.
 
 ### Impact
 
-- Password admin bisa disadap.
-- Session token bisa dicuri.
-- Traffic dimodifikasi oleh attacker.
-- Cookie `Secure` tidak efektif tanpa HTTPS.
+- The admin password can be intercepted.
+- Session tokens can be stolen.
+- Traffic can be modified by an attacker.
+- The `Secure` cookie flag is ineffective without HTTPS.
 
 ### Mitigation
 
-- Gunakan HTTPS di production.
-- Redirect HTTP ke HTTPS.
-- Gunakan valid TLS certificate.
-- Gunakan auto-renew certificate.
-- Cookie admin harus `Secure`.
+- Use HTTPS in production.
+- Redirect HTTP to HTTPS.
+- Use a valid TLS certificate.
+- Auto-renew the certificate.
+- The admin cookie must be `Secure`.
 
 ### Nginx Requirement
 
-Nginx harus:
+Nginx must:
 
-- Listen di port 80 untuk redirect.
-- Listen di port 443 untuk HTTPS.
-- Memiliki konfigurasi TLS certificate.
-- Menambahkan security headers.
+- Listen on port 80 for redirects.
+- Listen on port 443 for HTTPS.
+- Have a TLS certificate configured.
+- Add security headers.
 
 ---
 
@@ -904,18 +904,18 @@ Nginx harus:
 
 ### Threat
 
-Browser tidak mendapat instruksi security tambahan.
+The browser receives no additional security instructions.
 
 ### Impact
 
 - Clickjacking.
 - MIME sniffing.
 - Referrer leakage.
-- XSS impact lebih besar.
+- Greater XSS impact.
 
 ### Mitigation
 
-Tambahkan security headers dari Nginx.
+Add security headers in Nginx.
 
 Recommended headers:
 
@@ -926,7 +926,7 @@ add_header Referrer-Policy "strict-origin-when-cross-origin" always;
 add_header Permissions-Policy "camera=(), microphone=(), geolocation=()" always;
 ```
 
-Optional, setelah stabil:
+Optional, once stable:
 
 ```nginx
 add_header Content-Security-Policy "default-src 'self'; img-src 'self' data:; script-src 'self'; style-src 'self' 'unsafe-inline'; object-src 'none'; base-uri 'self'; frame-ancestors 'none';" always;
@@ -938,38 +938,38 @@ add_header Content-Security-Policy "default-src 'self'; img-src 'self' data:; sc
 
 ### Threat
 
-Database atau notes storage hilang.
+The database or notes storage is lost.
 
 Possible causes:
 
-- VPS rusak.
-- Docker volume terhapus.
+- VPS failure.
+- Docker volume deleted.
 - Human error.
-- Bug delete note.
+- A bug in note deletion.
 - Failed deployment.
-- Disk penuh.
+- Disk full.
 
 ### Impact
 
-- Notes hilang.
-- Images hilang.
-- Metadata dan filesystem tidak sinkron.
-- Aplikasi tidak bisa berjalan normal.
+- Notes are lost.
+- Images are lost.
+- Metadata and filesystem get out of sync.
+- The app cannot run normally.
 
 ### Mitigation
 
-- PostgreSQL menggunakan persistent volume.
-- Notes storage menggunakan persistent volume.
-- Backup database secara rutin.
-- Backup notes storage directory secara rutin.
-- Test restore backup.
-- Jangan hanya backup database.
-- Jangan hanya backup folder notes.
+- PostgreSQL uses a persistent volume.
+- Notes storage uses a persistent volume.
+- Back up the database regularly.
+- Back up the notes storage directory regularly.
+- Test restoring backups.
+- Do not back up only the database.
+- Do not back up only the notes folder.
 - Monitor disk usage.
 
 ### Backup Requirement
 
-Backup harus mencakup:
+Backups must include:
 
 ```txt
 1. PostgreSQL database
@@ -982,24 +982,24 @@ Backup harus mencakup:
 
 ### Threat
 
-Database menyimpan metadata note, tetapi file markdown hilang. Atau file markdown ada, tetapi metadata database hilang.
+The database has note metadata but the markdown file is missing. Or the markdown file exists but the database metadata is missing.
 
 ### Impact
 
-- Note tidak bisa dibaca.
+- The note cannot be read.
 - Broken note detail page.
-- Asset tidak ditemukan.
-- Backup/restore sulit.
+- Assets are not found.
+- Backup/restore becomes difficult.
 
 ### Mitigation
 
-- Create note harus dilakukan secara hati-hati.
-- Jika pembuatan file gagal, jangan insert metadata.
-- Jika insert metadata gagal, hapus folder yang sudah dibuat.
-- Update note harus menjaga konsistensi file dan metadata.
-- Delete note harus menghapus database dan folder.
-- Readiness check bisa memeriksa akses storage directory.
-- Tambahkan repair script di masa depan jika dibutuhkan.
+- Note creation must be done carefully.
+- If file creation fails, do not insert metadata.
+- If the metadata insert fails, delete the folder that was created.
+- Note updates must keep the file and metadata consistent.
+- Note deletion must remove both the database row and the folder.
+- The readiness check can verify access to the storage directory.
+- Add a repair script in the future if needed.
 
 ### Create Note Safe Flow
 
@@ -1028,7 +1028,7 @@ Database menyimpan metadata note, tetapi file markdown hilang. Atau file markdow
 
 ### Threat
 
-Attacker mengirim request besar atau terlalu banyak request.
+An attacker sends very large requests or too many requests.
 
 Targets:
 
@@ -1040,21 +1040,21 @@ Targets:
 
 ### Impact
 
-- CPU tinggi.
-- Memory penuh.
-- Disk penuh.
-- App lambat atau down.
+- High CPU usage.
+- Memory exhaustion.
+- Disk full.
+- The app becomes slow or goes down.
 
 ### Mitigation
 
-- Rate limit endpoint sensitif.
-- Batasi request body size.
-- Batasi ukuran markdown import.
-- Batasi ukuran image upload.
-- Batasi pagination limit.
+- Rate limit sensitive endpoints.
+- Limit request body size.
+- Limit markdown import size.
+- Limit image upload size.
+- Cap the pagination limit.
 - Nginx `client_max_body_size`.
-- Timeout request.
-- Logging untuk spike traffic.
+- Request timeouts.
+- Logging for traffic spikes.
 
 ### Required Limits
 
@@ -1072,22 +1072,22 @@ Targets:
 
 ### Threat
 
-Aplikasi mengembalikan error detail seperti stack trace, SQL error, path filesystem, atau environment value.
+The app returns error details such as stack traces, SQL errors, filesystem paths, or environment values.
 
 ### Impact
 
-- Internal structure bocor.
-- Path server bocor.
-- Query/database info bocor.
-- Secret bisa bocor.
+- Internal structure leaks.
+- Server paths leak.
+- Query/database info leaks.
+- Secrets can leak.
 
 ### Mitigation
 
-- Production response harus generic.
-- Detail error hanya masuk log server.
-- Jangan tampilkan stack trace ke client.
-- Jangan log password, session token, atau secret.
-- Gunakan error code standar.
+- Production responses must be generic.
+- Error details only go to server logs.
+- Do not show stack traces to clients.
+- Do not log passwords, session tokens, or secrets.
+- Use standard error codes.
 
 ### Bad Error Response
 
@@ -1275,56 +1275,56 @@ failed login password=admin123
 ### 11.1 Application Security
 
 ```txt
-[ ] Password admin disimpan sebagai hash.
-[ ] Session token disimpan sebagai hash di database.
-[ ] Session cookie menggunakan HttpOnly.
-[ ] Session cookie menggunakan Secure di production.
-[ ] Session cookie menggunakan SameSite.
-[ ] Login endpoint memiliki rate limit.
-[ ] Admin mutation endpoint memiliki CSRF protection atau Origin check.
-[ ] Markdown renderer tidak menjalankan raw HTML.
-[ ] Link dan image URL dalam markdown divalidasi.
-[ ] Semua SQL query menggunakan parameterized query.
-[ ] Error response production tidak membocorkan detail internal.
+[ ] The admin password is stored as a hash.
+[ ] Session tokens are stored as hashes in the database.
+[ ] The session cookie uses HttpOnly.
+[ ] The session cookie uses Secure in production.
+[ ] The session cookie uses SameSite.
+[ ] The login endpoint is rate limited.
+[ ] Admin mutation endpoints have CSRF protection or an Origin check.
+[ ] The markdown renderer does not execute raw HTML.
+[ ] Link and image URLs in markdown are validated.
+[ ] All SQL queries are parameterized.
+[ ] Production error responses do not leak internal details.
 ```
 
 ### 11.2 File Security
 
 ```txt
-[ ] Markdown import hanya menerima .md.
-[ ] Image upload hanya menerima tipe file yang diizinkan.
-[ ] Ukuran file dibatasi.
-[ ] Filename dinormalisasi.
-[ ] Path traversal dicegah.
-[ ] Backend tidak serve arbitrary file.
-[ ] Asset draft note tidak bisa diakses public.
-[ ] Notes storage menggunakan persistent volume.
+[ ] Markdown import only accepts .md.
+[ ] Image upload only accepts allowed file types.
+[ ] File size is limited.
+[ ] Filenames are normalized.
+[ ] Path traversal is prevented.
+[ ] The backend does not serve arbitrary files.
+[ ] Draft note assets are not publicly accessible.
+[ ] Notes storage uses a persistent volume.
 ```
 
 ### 11.3 Infrastructure Security
 
 ```txt
-[ ] Production menggunakan HTTPS.
-[ ] HTTP redirect ke HTTPS.
-[ ] Nginx menambahkan security headers.
-[ ] PostgreSQL tidak expose port ke internet.
-[ ] Backend, frontend, dan database berada di Docker internal network.
-[ ] Hanya Nginx expose port 80 dan 443.
-[ ] .env tidak masuk Git.
-[ ] Secret production tidak disimpan di repository.
-[ ] Container app berjalan sebagai non-root user jika memungkinkan.
+[ ] Production uses HTTPS.
+[ ] HTTP redirects to HTTPS.
+[ ] Nginx adds security headers.
+[ ] PostgreSQL does not expose a port to the internet.
+[ ] Backend, frontend, and database are on an internal Docker network.
+[ ] Only Nginx exposes ports 80 and 443.
+[ ] .env is not committed to Git.
+[ ] Production secrets are not stored in the repository.
+[ ] App containers run as a non-root user where possible.
 ```
 
 ### 11.4 Operations Security
 
 ```txt
-[ ] PostgreSQL dibackup.
-[ ] Notes storage directory dibackup.
-[ ] Restore backup pernah dites.
-[ ] Disk usage dimonitor.
-[ ] Logs dapat dicek saat incident.
-[ ] Deployment memiliki rollback plan.
-[ ] SSL certificate auto-renew.
+[ ] PostgreSQL is backed up.
+[ ] The notes storage directory is backed up.
+[ ] Backup restore has been tested.
+[ ] Disk usage is monitored.
+[ ] Logs can be inspected during an incident.
+[ ] Deployments have a rollback plan.
+[ ] The SSL certificate auto-renews.
 ```
 
 ---
@@ -1333,99 +1333,99 @@ failed login password=admin123
 
 ### 12.1 Authentication Model
 
-V1 menggunakan single admin authentication.
+V1 uses single-admin authentication.
 
-- Tidak ada multi-user login.
-- Tidak ada register user.
-- Password admin berasal dari owner aplikasi.
-- Hash password admin disimpan di environment variable.
-- Session admin disimpan di table `admin_sessions`.
+- No multi-user login.
+- No user registration.
+- The admin password comes from the app owner.
+- The admin password hash is stored in an environment variable.
+- Admin sessions are stored in the `admin_sessions` table.
 
 ---
 
 ### 12.2 Markdown Storage Model
 
-V1 menggunakan filesystem untuk menyimpan markdown content.
+V1 uses the filesystem to store markdown content.
 
-Database hanya menyimpan metadata.
+The database only stores metadata.
 
 Pros:
 
-- Cocok dengan konsep markdown-native.
-- Mudah mengelompokkan note dan assets.
-- Mudah backup folder notes.
-- Struktur sederhana dan mudah dipahami.
+- Fits the markdown-native concept.
+- Easy to group a note with its assets.
+- Easy to back up the notes folder.
+- Simple, easy-to-understand structure.
 
 Cons:
 
-- Harus menjaga konsistensi database dan filesystem.
-- Backup harus mencakup database dan storage directory.
-- Search isi markdown lebih sulit.
-- Scaling multi-server lebih sulit di masa depan.
+- Database and filesystem must be kept consistent.
+- Backups must include both the database and the storage directory.
+- Searching markdown content is harder.
+- Multi-server scaling is harder in the future.
 
 ---
 
 ### 12.3 Image Handling
 
-V1 menyimpan image per note di folder:
+V1 stores images per note in the folder:
 
 ```txt
 data/notes/{note_id}/images/
 ```
 
-Public image access melalui backend endpoint:
+Public image access goes through the backend endpoint:
 
 ```http
 GET /api/v1/notes/:id/assets/:filename
 ```
 
-Admin upload image melalui:
+The admin uploads images through:
 
 ```http
 POST /api/v1/admin/notes/:id/assets
 ```
 
-Backend harus validasi note status dan filename sebelum serve image.
+The backend must validate note status and filename before serving an image.
 
 ---
 
 ### 12.4 Public Access Model
 
-Public visitor dapat membaca:
+Public visitors can read:
 
 - List published notes.
 - Detail published note.
-- Assets dari published note.
+- Assets of published notes.
 - Tags.
 
-Public visitor tidak dapat:
+Public visitors cannot:
 
-- Membaca draft note.
-- Membaca assets dari draft note.
+- Read draft notes.
+- Read assets of draft notes.
 - Create, update, delete note.
 - Upload markdown.
 - Upload image.
-- Melihat admin session state.
+- See the admin session state.
 
 ---
 
 ## 13. Future Security Improvements
 
-Fitur keamanan yang dapat ditambahkan setelah V1:
+Security features that can be added after V1:
 
-- CSRF token penuh untuk admin mutation endpoint.
-- Content Security Policy yang lebih strict.
-- Audit log untuk admin actions.
-- Login attempt tracking dengan IP.
+- Full CSRF tokens for admin mutation endpoints.
+- A stricter Content Security Policy.
+- Audit log for admin actions.
+- Login attempt tracking by IP.
 - Admin session management page.
 - Automatic cleanup expired sessions.
-- Virus scanning untuk uploaded files.
-- Image re-encoding untuk menghapus metadata dan payload aneh.
-- Object storage seperti S3/MinIO untuk assets.
-- Full-text search dengan sanitization.
+- Virus scanning for uploaded files.
+- Image re-encoding to strip metadata and odd payloads.
+- Object storage such as S3/MinIO for assets.
+- Full-text search with sanitization.
 - Backup encryption.
-- Monitoring dan alerting.
-- Security scanning di CI/CD.
+- Monitoring and alerting.
+- Security scanning in CI/CD.
 - Dependency vulnerability scanning.
 - Container image scanning.
 
@@ -1501,23 +1501,23 @@ Steps:
 
 ## 15. Acceptance Criteria
 
-Security plan V1 dianggap cukup jika:
+The V1 security plan is considered sufficient when:
 
 ```txt
-[ ] Public hanya bisa membaca published notes.
-[ ] Admin harus login sebelum CRUD notes.
-[ ] Password admin tidak disimpan plaintext.
-[ ] Session cookie memakai HttpOnly, Secure, dan SameSite di production.
-[ ] Login endpoint memiliki rate limit.
-[ ] SQL query menggunakan parameterized query.
-[ ] Markdown tidak dirender sebagai raw HTML.
-[ ] Markdown renderer memiliki sanitization.
-[ ] Upload markdown dibatasi dan divalidasi.
-[ ] Upload image dibatasi dan divalidasi.
-[ ] Path traversal dicegah.
-[ ] Database tidak exposed ke internet.
-[ ] Notes storage menggunakan persistent volume.
-[ ] Backup mencakup database dan notes storage.
-[ ] Production menggunakan HTTPS.
-[ ] Secret tidak masuk repository.
+[ ] The public can only read published notes.
+[ ] The admin must log in before note CRUD.
+[ ] The admin password is not stored in plaintext.
+[ ] The session cookie uses HttpOnly, Secure, and SameSite in production.
+[ ] The login endpoint is rate limited.
+[ ] SQL queries are parameterized.
+[ ] Markdown is not rendered as raw HTML.
+[ ] The markdown renderer sanitizes output.
+[ ] Markdown uploads are limited and validated.
+[ ] Image uploads are limited and validated.
+[ ] Path traversal is prevented.
+[ ] The database is not exposed to the internet.
+[ ] Notes storage uses a persistent volume.
+[ ] Backups include the database and notes storage.
+[ ] Production uses HTTPS.
+[ ] Secrets are not in the repository.
 ```
