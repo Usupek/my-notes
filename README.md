@@ -35,6 +35,7 @@ Published notes are available as an RSS feed at `/feed.xml` (latest 20 notes, fu
 - `make build`: build the app images.
 - `make logs`: follow container logs.
 - `make down`: stop the app.
+- `make seed`: add a few dummy notes (3 published, 1 draft) to a running **local** stack. Prompts for the admin password; you can also pass it as `ADMIN_PASSWORD=... make seed`.
 - `./scripts/backup.sh`: back up the database and notes storage.
 
 ## Production

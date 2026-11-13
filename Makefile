@@ -1,4 +1,4 @@
-.PHONY: dev build up down logs migrate test lint fmt vet hooks hash-password
+.PHONY: dev build up down logs migrate test lint fmt vet hooks hash-password seed
 
 dev:
 	docker compose up --build
@@ -35,3 +35,6 @@ hooks:
 
 hash-password:
 	cd services/api && go run ./cmd/hashpassword
+
+seed:
+	./scripts/seed-dev.sh
