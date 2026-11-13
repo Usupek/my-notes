@@ -143,7 +143,13 @@ func (s *Store) DeleteNote(ctx context.Context, id string) error {
 }
 
 func (s *Store) ListTags(ctx context.Context) ([]Tag, error) {
-	rows, err := s.DB.Query(ctx, `SELECT id, name FROM tags ORDER BY name`)
+	rows, err := s.DB.Query(ctx, `
+		SELECT t.id, t.name FROM tags t
+		WHERE EXISTS (
+			SELECT 1 FROM note_tags nt JOIN notes n ON n.id = nt.note_id
+			WHERE nt.tag_id = t.id AND n.is_published = true
+		)
+		ORDER BY t.name`)
 	if err != nil {
 		return nil, err
 	}
