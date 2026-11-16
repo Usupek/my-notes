@@ -7,6 +7,7 @@ import { Markdown } from "./markdown";
 import { request } from "@/lib/api";
 import type { Note } from "@/lib/types";
 
+const INDENT = "\t";
 const IMAGE_TYPES = ["image/png", "image/jpeg", "image/webp", "image/gif"];
 const IMAGE_EXTENSIONS: Record<string, string> = { "image/png": "png", "image/jpeg": "jpg", "image/webp": "webp", "image/gif": "gif" };
 
@@ -152,7 +153,44 @@ export function NoteEditor({ id }: { id?: string }) {
     else wrapSelection("`", "`", "code");
   }
 
+  // Tab inserts a tab at the caret, or indents every selected line when the selection spans lines.
+  // Shift+Tab removes one level (a tab or up to 4 spaces) from every line touched by the selection.
+  function indentSelection(outdent: boolean) {
+    const el = textareaRef.current;
+    if (!el) return;
+    const { selectionStart: start, selectionEnd: end, value } = el;
+    if (!outdent && !value.slice(start, end).includes("\n")) {
+      replaceSelection(INDENT, start, end, start + INDENT.length, start + INDENT.length);
+      return;
+    }
+    // A selection ending right after a newline shouldn't pull in the next line.
+    const effectiveEnd = end > start && value[end - 1] === "\n" ? end - 1 : end;
+    const lineStart = value.lastIndexOf("\n", start - 1) + 1;
+    const lineEndIndex = value.indexOf("\n", effectiveEnd);
+    const lineEnd = lineEndIndex === -1 ? value.length : lineEndIndex;
+    const lines = value.slice(lineStart, lineEnd).split("\n");
+
+    if (!outdent) {
+      const updated = lines.map((line) => INDENT + line).join("\n");
+      replaceSelection(updated, lineStart, lineEnd, start + INDENT.length, end + INDENT.length * lines.length);
+      return;
+    }
+
+    const removed = lines.map((line) => (line.startsWith("\t") ? 1 : (line.match(/^ {1,4}/)?.[0].length ?? 0)));
+    const total = removed.reduce((sum, n) => sum + n, 0);
+    if (total === 0) return;
+    const updated = lines.map((line, i) => line.slice(removed[i])).join("\n");
+    const newStart = Math.max(lineStart, start - removed[0]);
+    const newEnd = Math.max(newStart, end - total);
+    replaceSelection(updated, lineStart, lineEnd, newStart, newEnd);
+  }
+
   function handleKeyDown(event: React.KeyboardEvent<HTMLTextAreaElement>) {
+    if (event.key === "Tab" && !event.ctrlKey && !event.metaKey && !event.altKey && !event.nativeEvent.isComposing) {
+      event.preventDefault();
+      indentSelection(event.shiftKey);
+      return;
+    }
     if (!(event.ctrlKey || event.metaKey)) return;
     // Use the physical key so Shift+8 etc. work regardless of keyboard layout.
     const code = event.code;
@@ -247,6 +285,7 @@ export function NoteEditor({ id }: { id?: string }) {
               <span><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>8</kbd> list</span>
               <span><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>7</kbd> numbered</span>
               <span><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>.</kbd> quote</span>
+              <span><kbd>Tab</kbd> / <kbd>Shift</kbd>+<kbd>Tab</kbd> indent / outdent</span>
               <span><kbd>Ctrl</kbd>+<kbd>S</kbd> save</span>
               <span><kbd>Ctrl</kbd>+<kbd>V</kbd> paste image</span>
             </div>
