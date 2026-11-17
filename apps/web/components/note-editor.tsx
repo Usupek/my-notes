@@ -22,6 +22,7 @@ export function NoteEditor({ id }: { id?: string }) {
   const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const previewRef = useRef<HTMLDivElement>(null);
   const pendingUploads = useRef(0);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("# New note\n\nStart writing here.");
@@ -44,6 +45,31 @@ export function NoteEditor({ id }: { id?: string }) {
       .catch((err: Error) => setError(err.message))
       .finally(() => setLoading(false));
   }, [id]);
+
+  // Keep the preview exactly as tall as the textarea (which the user can resize) so both panes scroll the same way.
+  useEffect(() => {
+    const textarea = textareaRef.current;
+    const preview = previewRef.current;
+    if (!textarea || !preview) return;
+    const observer = new ResizeObserver(() => {
+      preview.style.height = `${textarea.offsetHeight}px`;
+    });
+    observer.observe(textarea);
+    return () => observer.disconnect();
+  }, [loading]);
+
+  // Mirror the textarea's scroll position onto the preview, proportionally, since rendered markdown has a different height.
+  function syncPreviewScroll() {
+    const textarea = textareaRef.current;
+    const preview = previewRef.current;
+    if (!textarea || !preview) return;
+    const maxSource = textarea.scrollHeight - textarea.clientHeight;
+    const ratio = maxSource > 0 ? textarea.scrollTop / maxSource : 0;
+    preview.scrollTop = ratio * (preview.scrollHeight - preview.clientHeight);
+  }
+
+  // Re-align after edits, since the rendered preview height changes with the content.
+  useEffect(syncPreviewScroll, [content]);
 
   async function save(event: React.FormEvent) {
     event.preventDefault();
@@ -274,7 +300,7 @@ export function NoteEditor({ id }: { id?: string }) {
         <div className="editor-grid">
           <div className="editor-pane">
             <div className="pane-label">MARKDOWN</div>
-            <textarea ref={textareaRef} value={content} onChange={(event) => setContent(event.target.value)} onKeyDown={handleKeyDown} onPaste={handlePaste} spellCheck={false} required />
+            <textarea ref={textareaRef} value={content} onChange={(event) => setContent(event.target.value)} onKeyDown={handleKeyDown} onScroll={syncPreviewScroll} onPaste={handlePaste} spellCheck={false} required />
             <div className="editor-hints">
               <span><kbd>Ctrl</kbd>+<kbd>B</kbd> bold</span>
               <span><kbd>Ctrl</kbd>+<kbd>I</kbd> italic</span>
@@ -290,7 +316,10 @@ export function NoteEditor({ id }: { id?: string }) {
               <span><kbd>Ctrl</kbd>+<kbd>V</kbd> paste image</span>
             </div>
           </div>
-          <div className="preview-pane"><div className="pane-label">PREVIEW</div><Markdown content={content} assetBaseUrl={id ? `/api/v1/notes/${id}/assets` : undefined} /></div>
+          <div className="preview-pane">
+            <div className="pane-label">PREVIEW</div>
+            <div className="preview-scroll" ref={previewRef}><Markdown content={content} assetBaseUrl={id ? `/api/v1/notes/${id}/assets` : undefined} /></div>
+          </div>
         </div>
       </form>
     </div>

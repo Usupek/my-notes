@@ -171,7 +171,9 @@ input:focus, textarea:focus { border-color: var(--accent); }
 .editor-pane textarea { width: 100%; min-height: 68vh; margin: 0; padding: 22px; resize: vertical; border: 0; border-radius: 0; background: transparent; font: 14px/1.7 var(--mono); tab-size: 4; }
 .editor-hints { display: flex; flex-wrap: wrap; gap: 6px 14px; padding: 10px 15px; border-top: 1px solid var(--line); color: var(--muted); font: 10px/1.6 var(--mono); letter-spacing: .04em; }
 .editor-hints kbd { display: inline-block; padding: 0 4px; border: 1px solid var(--line); border-radius: 2px; background: var(--panel); color: var(--ink); font: inherit; }
-.preview-pane { min-width: 0; }.preview-pane .markdown { min-height: 68vh; padding: 20px 34px 52px; }
+.preview-pane { min-width: 0; }
+.preview-scroll { height: 68vh; overflow-y: auto; }
+.preview-pane .markdown { padding: 20px 34px 52px; }
 
 @media (max-width: 760px) {
   .feed-url { flex-direction: column; }
@@ -205,7 +207,7 @@ input:focus, textarea:focus { border-color: var(--accent); }
   .editor-grid { grid-template-columns: 1fr; }
   .editor-pane { border-right: 0; border-bottom: 1px solid var(--line); }
   .editor-pane textarea { min-height: 52vh; }
-  .preview-pane .markdown { min-height: 40vh; padding: 14px 20px 40px; }
+  .preview-pane .markdown { padding: 14px 20px 40px; }
   .login-card { padding: 32px 26px; box-shadow: 8px 8px 0 #e1dcd1; }
 }
 
