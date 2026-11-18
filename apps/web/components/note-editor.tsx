@@ -32,6 +32,7 @@ export function NoteEditor({ id }: { id?: string }) {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [previewFullscreen, setPreviewFullscreen] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -67,6 +68,21 @@ export function NoteEditor({ id }: { id?: string }) {
     const ratio = maxSource > 0 ? textarea.scrollTop / maxSource : 0;
     preview.scrollTop = ratio * (preview.scrollHeight - preview.clientHeight);
   }
+
+  // Esc closes the full-screen preview; lock page scroll behind the overlay while it is open.
+  useEffect(() => {
+    if (!previewFullscreen) return;
+    function onKey(event: KeyboardEvent) {
+      if (event.key === "Escape") setPreviewFullscreen(false);
+    }
+    window.addEventListener("keydown", onKey);
+    const overflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = overflow;
+    };
+  }, [previewFullscreen]);
 
   // Re-align after edits, since the rendered preview height changes with the content.
   useEffect(syncPreviewScroll, [content]);
@@ -316,12 +332,35 @@ export function NoteEditor({ id }: { id?: string }) {
               <span><kbd>Ctrl</kbd>+<kbd>V</kbd> paste image</span>
             </div>
           </div>
-          <div className="preview-pane">
-            <div className="pane-label">PREVIEW</div>
+          <div className={previewFullscreen ? "preview-pane fullscreen" : "preview-pane"}>
+            <div className="pane-label">
+              PREVIEW
+              <button
+                type="button"
+                className="pane-icon-button"
+                onClick={() => setPreviewFullscreen((value) => !value)}
+                aria-label={previewFullscreen ? "Exit full screen preview" : "Full screen preview"}
+                title={previewFullscreen ? "Exit full screen (Esc)" : "Full screen"}
+              >
+                <FullscreenIcon exit={previewFullscreen} />
+              </button>
+            </div>
             <div className="preview-scroll" ref={previewRef}><Markdown content={content} assetBaseUrl={id ? `/api/v1/notes/${id}/assets` : undefined} /></div>
           </div>
         </div>
       </form>
     </div>
+  );
+}
+
+function FullscreenIcon({ exit }: { exit: boolean }) {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      {exit ? (
+        <path d="M8 3v3a2 2 0 0 1-2 2H3M21 8h-3a2 2 0 0 1-2-2V3M3 16h3a2 2 0 0 1 2 2v3M16 21v-3a2 2 0 0 1 2-2h3" />
+      ) : (
+        <path d="M8 3H5a2 2 0 0 0-2 2v3M21 8V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3M16 21h3a2 2 0 0 0 2-2v-3" />
+      )}
+    </svg>
   );
 }

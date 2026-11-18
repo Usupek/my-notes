@@ -175,6 +175,11 @@ input:focus, textarea:focus { border-color: var(--accent); }
 .preview-pane { min-width: 0; }
 .preview-scroll { height: 68vh; overflow-y: auto; }
 .preview-pane .markdown { padding: 20px 34px 52px; }
+.pane-label .pane-icon-button { margin-left: auto; width: 26px; height: 26px; display: inline-flex; align-items: center; justify-content: center; padding: 0; border: 1px solid transparent; border-radius: 2px; background: transparent; color: var(--muted); cursor: pointer; }
+.pane-label .pane-icon-button:hover { border-color: var(--line); color: var(--ink); }
+.preview-pane.fullscreen { position: fixed; inset: 0; z-index: 100; display: flex; flex-direction: column; background: var(--panel); }
+.preview-pane.fullscreen .preview-scroll { flex: 1; height: auto !important; }
+.preview-pane.fullscreen .markdown { max-width: 860px; margin: 0 auto; }
 
 @media (max-width: 760px) {
   .feed-url { flex-direction: column; }
