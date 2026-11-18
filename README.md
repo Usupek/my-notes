@@ -28,6 +28,8 @@ The frontend dev server runs on `http://localhost:3000` and the API on `http://l
 
 Published notes are available as an RSS feed at `/feed.xml` (latest 20 notes, full content). Absolute links in the feed use `SITE_URL`; in production it is set to `https://$DOMAIN` automatically. The "Subscribe RSS" button in the footer opens `/subscribe`, which explains how to add the feed in a reader on each platform.
 
+To turn RSS off, set `RSS_ENABLED=false` in `.env` and rebuild the web image (`make build`, then restart). `/feed.xml` and `/subscribe` then return 404 and the footer button and feed `<link>` tag are hidden.
+
 ## Commands
 
 - `make test`: run backend tests.

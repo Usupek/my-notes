@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { CopyField } from "@/components/copy-button";
 import { RssIcon } from "@/components/rss-link";
-import { siteUrl } from "@/lib/site";
+import { rssEnabled, siteUrl } from "@/lib/site";
 
 export const metadata: Metadata = { title: "Subscribe · Usupek's Notes" };
 
@@ -17,6 +18,7 @@ const PLATFORMS: { name: string; apps: { name: string; href: string }[] }[] = [
 ];
 
 export default async function SubscribePage() {
+  if (!rssEnabled()) notFound();
   const feedUrl = `${siteUrl(await headers())}/feed.xml`;
 
   return (

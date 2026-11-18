@@ -4,7 +4,7 @@ import remarkParse from "remark-parse";
 import remarkRehype from "remark-rehype";
 import { unified } from "unified";
 import { serverApi } from "@/lib/api";
-import { siteUrl } from "@/lib/site";
+import { rssEnabled, siteUrl } from "@/lib/site";
 import type { Note } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -71,6 +71,7 @@ async function fetchJson<T>(path: string): Promise<T | null> {
 }
 
 export async function GET(request: Request) {
+  if (!rssEnabled()) return new Response("Not found", { status: 404 });
   const site = siteUrl(request.headers);
   const list = await fetchJson<Note[]>("/notes?limit=50");
   if (!list) return new Response("Feed unavailable", { status: 502 });

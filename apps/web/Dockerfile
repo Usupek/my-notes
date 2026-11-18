@@ -9,6 +9,8 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 ARG API_INTERNAL_URL=http://api:8080
 ENV API_INTERNAL_URL=$API_INTERNAL_URL
+ARG RSS_ENABLED=true
+ENV RSS_ENABLED=$RSS_ENABLED
 RUN npm run build
 
 FROM node:24-alpine

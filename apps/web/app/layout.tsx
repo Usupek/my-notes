@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { RssButton } from "@/components/rss-link";
+import { rssEnabled } from "@/lib/site";
 import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Usupek's Notes",
   description: "Random thing(s) that I want to yap about.",
-  alternates: { types: { "application/rss+xml": "/feed.xml" } },
+  ...(rssEnabled() && { alternates: { types: { "application/rss+xml": "/feed.xml" } } }),
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
@@ -19,7 +20,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <main>{children}</main>
         <footer>
           <span>@Usupek 2026</span>
-          <RssButton />
+          {rssEnabled() && <RssButton />}
         </footer>
       </body>
     </html>
