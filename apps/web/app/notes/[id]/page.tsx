@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { DownloadPdfButton } from "@/components/download-pdf-button";
 import { Markdown } from "@/components/markdown";
 import { formatDate, serverApi } from "@/lib/api";
 import type { Note } from "@/lib/types";
@@ -16,7 +17,10 @@ export default async function NotePage({ params }: { params: Promise<{ id: strin
   if (!note) notFound();
   return (
     <article className="article-shell">
-      <Link className="back-link" href="/">← Back to Archive</Link>
+      <div className="article-toolbar">
+        <Link className="back-link" href="/">← Back to Archive</Link>
+        <DownloadPdfButton title={note.title} />
+      </div>
       <header className="article-header">
         <div className="note-meta">
           <time dateTime={note.created_at}>Created {formatDate(note.created_at)}</time>
